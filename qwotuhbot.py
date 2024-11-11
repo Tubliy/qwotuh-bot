@@ -19,6 +19,7 @@ import os
 import sys
 import logging
 import traceback
+import re
 
 logging.basicConfig(level=logging.INFO, filename='/home/tubliy/qwotuh-bot/bot.log')
 
@@ -483,7 +484,8 @@ async def on_message(message):
 
     # Check for any banned words in the message content
     for word in banned_words:
-        if word.lower() in message.content.lower():
+        # Use regular expression to match whole words only
+        if re.search(rf'\b{re.escape(word)}\b', message.content, re.IGNORECASE):
             await message.author.ban(reason=f'Used banned word: {word}')
             await message.channel.send(f'```\n{message.author.name} has been banned for an inappropriate word.```')
             return  # Return here to stop further processing for this message if banned
