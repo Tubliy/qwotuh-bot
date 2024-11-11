@@ -153,7 +153,9 @@ async def poll(ctx, *, question):
     await message.add_reaction("👍")
     await message.add_reaction("👎")
 
-
+async def async_check_tiktok_live(username):
+    return await asyncio.to_thread(check_tiktok_live, username)
+    
 def check_tiktok_live(username):
     tiktok_url = f"https://www.tiktok.com/@{username}"
     chrome_options = Options()
@@ -198,23 +200,23 @@ async def live_tiktokcheck():
     channel = bot.get_channel(ANNOUNCEMENT_CHANNEL_ID)
 
     if channel is None:
-        print("Channel not found. Check ANNOUNCEMENT_CHANNEL_ID.")
+        logging.error("Channel not found. Check ANNOUNCEMENT_CHANNEL_ID.")
         return
 
-    # Check live status using the constant USERNAME
-    is_live = check_tiktok_live(USERNAME)
-    print(f"Live status: {is_live}")  # Debugging log
+    # Check live status asynchronously
+    is_live = await async_check_tiktok_live(USERNAME)
+    logging.info(f"Live status for {USERNAME}: {is_live}")
 
-    # If the user is live and hasn't been announced yet, post the announcement
     if is_live and not was_live_tiktok:
-        await channel.send(f"<@&{ROLE_IDS['Notifications']}> \n🚨 **I'm live on TikTok!** 🚨\nCome watch: https://www.tiktok.com/@{USERNAME}")
-        was_live_tiktok = True  # Update live status
+        if "Notifications" in ROLE_IDS:
+            await channel.send(f"<@&{ROLE_IDS['Notifications']}> \n🚨 **I'm live on TikTok!** 🚨\nCome watch: https://www.tiktok.com/@{USERNAME}")
+        else:
+            logging.warning("Notification role ID not found.")
+        was_live_tiktok = True
     elif not is_live and was_live_tiktok:
-        # Set to False when the user goes offline
         was_live_tiktok = False
     else:
-        print("No change in live status.")
-        
+        logging.info("No change in live status.")
 '''
 async def check_twitch_live():
     return await asyncio.get_running_loop().run_in_executor(executor, sync_check_twitch_live)
