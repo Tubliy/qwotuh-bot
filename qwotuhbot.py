@@ -158,6 +158,13 @@ def sync_check_tiktok_live():
         driver.delete_all_cookies()
         # Open TikTok profile page
         driver.get(tiktok_url)
+      
+       # Scroll down the page to load dynamic content
+        print("Scrolling to load dynamic content...")
+        body = driver.find_element(By.TAG_NAME, 'body')
+        for _ in range(3):  # Scroll 3 times, adjust this number as needed
+            body.send_keys(Keys.PAGE_DOWN)
+
 
         # Wait for the live badge to appear
         try:
@@ -236,7 +243,14 @@ def sync_check_twitch_live():
         driver.delete_all_cookies()
         # Open Twitch profile page
         driver.get(twitch_url)
-      
+
+       # Scroll down the page to load dynamic content
+        print("Scrolling to load dynamic content...")
+        body = driver.find_element(By.TAG_NAME, 'body')
+        for _ in range(3):  # Scroll 3 times, adjust this number as needed
+            body.send_keys(Keys.PAGE_DOWN)
+
+        # Wait for the live badge to appear
         try:
             live_element = WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.XPATH, "//*[contains(text(), 'LIVE')]"))
