@@ -323,7 +323,7 @@ async def on_ready():
     else:
         print("update_count task is already running.")
 
-    # Start the live check task if it's not already running
+   ''' # Start the live check task if it's not already running
     if not live_twitchcheck.is_running():
         print("Starting live_twitchcheck task...")
         live_twitchcheck.start()
@@ -335,6 +335,7 @@ async def on_ready():
         live_tiktokcheck.start()
     else:
         print("live_tiktokcheck task is already running.")
+        '''
 
 @bot.command()
 @commands.is_owner()
