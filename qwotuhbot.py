@@ -147,8 +147,8 @@ def sync_check_tiktok_live():
         # Set up Chrome options (running without headless mode for testing)
         chrome_options = Options()
         chrome_options.add_argument("--headless")  # Commented out to run in non-headless mode for debugging
-        #chrome_options.add_argument("--no-sandbox")
-        #chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3")
     
         
@@ -228,8 +228,8 @@ def sync_check_twitch_live():
         # Set up Chrome options (running without headless mode for testing)
         chrome_options = Options()
         chrome_options.add_argument("--headless")  # Commented out to run in non-headless mode for debugging
-        #chrome_options.add_argument("--no-sandbox")
-        #chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3")
     
         
