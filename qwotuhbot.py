@@ -227,7 +227,7 @@ async def live_tiktokcheck():
     else:
         print("No change in live status.")
         
-'''   
+
 async def check_twitch_live():
     return await asyncio.get_running_loop().run_in_executor(executor, sync_check_twitch_live)
 
@@ -238,7 +238,7 @@ def sync_check_twitch_live():
     driver = None 
     try:
         # Your Twitch username
-        twitch_username = "qwotuh"  # Replace with your actual Twitch username
+        twitch_username = "kaicenat"  # Replace with your actual Twitch username
         twitch_url = f"https://www.twitch.tv/{twitch_username}"
 
         # Path to your ChromeDriver
@@ -247,8 +247,8 @@ def sync_check_twitch_live():
         # Set up Chrome options
         chrome_options = Options()
         chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-dev-shm-usage")
+        #chrome_options.add_argument("--no-sandbox")
+        #chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--disable-software-rasterizer")
         chrome_options.add_argument("--remote-debugging-port=9222")
@@ -310,7 +310,7 @@ async def live_twitchcheck():
         was_live_twitch = False
     else:
         print("No change in live status.")
-'''
+
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} is online!')
@@ -319,14 +319,14 @@ async def on_ready():
         update_count.start()
     else:
         print("update_count task is already running.")
-    '''
+    
     # Start the live check task if it's not already running
     if not live_twitchcheck.is_running():
         print("Starting live_twitchcheck task...")
         live_twitchcheck.start()
     else:
         print("live_twitchcheck task is already running.")
-    '''
+    
     if not live_tiktokcheck.is_running():
         print("Starting live_tiktokcheck task...")
         live_tiktokcheck.start()
