@@ -224,7 +224,7 @@ def sync_check_twitch_live():
     driver = None 
     try:
         # Your Twitch username
-        twitch_username = "kaicenat"  # Replace with your actual Twitch username
+        twitch_username = "qwotuh"  # Replace with your actual Twitch username
         twitch_url = f"https://www.twitch.tv/{twitch_username}"
 
         # Path to your ChromeDriver
