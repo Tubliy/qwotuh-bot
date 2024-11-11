@@ -251,7 +251,7 @@ def sync_check_twitch_live():
         print(f"Error occurred while checking Twitch live status: {e}")
         logging.error(f"Error occurred: {e}")
         return False
-   finally:
+    finally:
         if driver is not None:
             driver.quit()
 
