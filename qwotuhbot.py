@@ -142,7 +142,7 @@ def sync_check_tiktok_live():
         tiktok_url = f"https://www.tiktok.com/@{tiktok_username}"
 
         # Path to your ChromeDriver (use the full path to chromedriver.exe)
-        chrome_driver_path = r"C:\Users\Christian\Downloads\chromedriver\chromedriver.exe"
+        chrome_driver_path = '/usr/local/bin/chromedriver'
 
         # Set up Chrome options (running without headless mode for testing)
         chrome_options = Options()
@@ -223,7 +223,7 @@ def sync_check_twitch_live():
         twitch_url = f"https://www.twitch.tv/{twitch_username}"
 
         # Path to your ChromeDriver (use the full path to chromedriver.exe)
-        chrome_driver_path = r"C:\Users\Christian\Downloads\chromedriver\chromedriver.exe"
+        chrome_driver_path = '/usr/local/bin/chromedriver'
 
         # Set up Chrome options (running without headless mode for testing)
         chrome_options = Options()
