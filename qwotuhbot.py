@@ -255,7 +255,6 @@ def sync_check_twitch_live():
             live_element = WebDriverWait(driver, 20).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, ".ScThumbnailBrowse-featured__live-badge"))
             )
-            )
             print("User is live!")
             return True
         except TimeoutException:
