@@ -3,6 +3,7 @@ import random
 import yt_dlp
 import asyncio
 import requests
+'''
 from discord.ext import commands, tasks
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -13,6 +14,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.keys import Keys
 from concurrent.futures import ThreadPoolExecutor
+'''
 import time
 import logging
 import os
