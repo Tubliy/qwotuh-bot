@@ -136,6 +136,7 @@ async def check_tiktok_live():
 logging.basicConfig(filename='tiktok_live_check.log', level=logging.INFO)
 
 def sync_check_tiktok_live():
+    driver = None  # Initialize driver to None
     try:
         # Your TikTok username
         tiktok_username = "qwotuh"  # Replace with your actual TikTok username
@@ -158,12 +159,6 @@ def sync_check_tiktok_live():
         # Open TikTok profile page
         driver.get(tiktok_url)
 
-        # Scroll down the page to load dynamic content
-        print("Scrolling to load dynamic content...")
-        body = driver.find_element(By.TAG_NAME, 'body')
-        for _ in range(3):  # Scroll 3 times, adjust this number as needed
-            body.send_keys(Keys.PAGE_DOWN)
-
         # Wait for the live badge to appear
         try:
             live_element = WebDriverWait(driver, 10).until(
@@ -180,7 +175,9 @@ def sync_check_tiktok_live():
         logging.error(f"Error occurred: {e}")
         return False
     finally:
-        driver.quit()
+        if driver is not None:
+            driver.quit()
+
 
 # Background task to check if you're live on TikTok every 5 minutes
 
@@ -217,6 +214,7 @@ async def check_twitch_live():
 logging.basicConfig(filename='twitch_live_check.log', level=logging.INFO)
 
 def sync_check_twitch_live():
+    driver = None 
     try:
         # Your Twitch username
         twitch_username = "qwotuh"  # Replace with your actual Twitch username
@@ -238,14 +236,7 @@ def sync_check_twitch_live():
         driver.delete_all_cookies()
         # Open Twitch profile page
         driver.get(twitch_url)
-
-        # Scroll down the page to load dynamic content
-        print("Scrolling to load dynamic content...")
-        body = driver.find_element(By.TAG_NAME, 'body')
-        for _ in range(3):  # Scroll 3 times, adjust this number as needed
-            body.send_keys(Keys.PAGE_DOWN)
-
-        # Wait for the live badge to appear
+      
         try:
             live_element = WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.XPATH, "//*[contains(text(), 'LIVE')]"))
@@ -260,8 +251,10 @@ def sync_check_twitch_live():
         print(f"Error occurred while checking Twitch live status: {e}")
         logging.error(f"Error occurred: {e}")
         return False
-    finally:
-        driver.quit()
+   finally:
+        if driver is not None:
+            driver.quit()
+
       
 @tasks.loop(minutes=7)
 async def live_twitchcheck():
