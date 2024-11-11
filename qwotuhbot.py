@@ -515,9 +515,11 @@ async def help(ctx):
     await ctx.send(embed=embed)
     
 @bot.command()
+@commands.is_owner()
 async def stop(ctx):
-    await ctx.send("Stopping the bot..")
+    await ctx.send("Stopping the bot and service...")
     await bot.close()
+    os.system("sudo systemctl stop qwotuhbot")
     
 # Run the bot with your token
 bot.run('MTI5NzA2MDU0OTIwNDUxMjgzOQ.GfV15z._yiVFaa2DF83VRld8V6EXdQuwHN72DComXJKuo')
