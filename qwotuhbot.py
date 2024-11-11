@@ -1,9 +1,8 @@
-'''import discord
+import discord
 import random
 import yt_dlp
 import asyncio
 import requests
-'''
 from discord.ext import commands, tasks
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -14,12 +13,10 @@ from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.keys import Keys
 from concurrent.futures import ThreadPoolExecutor
-'''
 import time
 import logging
 import os
 import sys
-'''
 import logging
 import traceback
 
@@ -27,7 +24,7 @@ logging.basicConfig(level=logging.INFO, filename='/home/tubliy/qwotuh-bot/bot.lo
 
 try:
     # Your bot code here
-    import discord  # Example dependency
+    # Example dependency
     # Initialize and run the bot as usual
     # Example of on_ready event
     client = discord.Client()
@@ -169,8 +166,8 @@ def sync_check_tiktok_live():
 
         chrome_options = Options()
         chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-dev-shm-usage")
+        #chrome_options.add_argument("--no-sandbox")
+        #chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--disable-software-rasterizer")
         chrome_options.add_argument("--remote-debugging-port=9222")
@@ -329,13 +326,13 @@ async def on_ready():
         live_twitchcheck.start()
     else:
         print("live_twitchcheck task is already running.")
-
+    '''
     if not live_tiktokcheck.is_running():
         print("Starting live_tiktokcheck task...")
         live_tiktokcheck.start()
     else:
         print("live_tiktokcheck task is already running.")
-        '''
+        
 
 @bot.command()
 @commands.is_owner()
