@@ -162,7 +162,7 @@ def sync_check_tiktok_live():
             body.send_keys(Keys.PAGE_DOWN)
 
         logging.info("Waiting for live badge to appear.")
-        live_element = WebDriverWait(driver, 20).until(
+        live_element = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".css-1n3ab5j-SpanLiveBadge.e1vl87hj3"))
         )
         logging.info("User is live!")
@@ -246,7 +246,7 @@ def sync_check_twitch_live():
 
         # Wait for the live badge to appear
         try:
-            live_element = WebDriverWait(driver, 20).until(
+            live_element = WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, ".ScThumbnailBrowse-featured__live-badge"))
             )
             print("User is live!")
