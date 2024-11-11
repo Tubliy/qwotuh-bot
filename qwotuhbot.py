@@ -513,7 +513,11 @@ async def help(ctx):
     
     # Send the embed with help information
     await ctx.send(embed=embed)
-
-
+    
+@bot.command()
+async def stop(ctx):
+    await ctx.send("Stopping the bot..")
+    await bot.close()
+    
 # Run the bot with your token
 bot.run('MTI5NzA2MDU0OTIwNDUxMjgzOQ.GfV15z._yiVFaa2DF83VRld8V6EXdQuwHN72DComXJKuo')
