@@ -136,55 +136,47 @@ async def check_tiktok_live():
 logging.basicConfig(filename='tiktok_live_check.log', level=logging.INFO)
 
 def sync_check_tiktok_live():
-    driver = None  # Initialize driver to None
+    driver = None
     try:
-        # Your TikTok username
-        tiktok_username = "qwotuh"  # Replace with your actual TikTok username
+        tiktok_username = "qwotuh"
         tiktok_url = f"https://www.tiktok.com/@{tiktok_username}"
+        logging.info(f"Checking TikTok live status for {tiktok_username}.")
 
-        # Path to your ChromeDriver
-        chrome_driver_path = '/usr/local/bin/chromedriver'
-
-        # Set up Chrome options
         chrome_options = Options()
         chrome_options.add_argument("--headless")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--disable-software-rasterizer")
         chrome_options.add_argument("--remote-debugging-port=9222")
 
         service = Service(chrome_driver_path)
         driver = webdriver.Chrome(service=service, options=chrome_options)
 
-        driver.delete_all_cookies()
-        # Open TikTok profile page
+        logging.info("Opening TikTok profile page.")
         driver.get(tiktok_url)
-      
-       # Scroll down the page to load dynamic content
-        print("Scrolling to load dynamic content...")
+        logging.info("Scrolling the page to load content.")
+        
         body = driver.find_element(By.TAG_NAME, 'body')
-        for _ in range(3):  # Scroll 3 times, adjust this number as needed
+        for _ in range(3):
             body.send_keys(Keys.PAGE_DOWN)
 
-
-        # Wait for the live badge to appear
-        try:
-            live_element = WebDriverWait(driver, 20).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, ".css-1n3ab5j-SpanLiveBadge.e1vl87hj3"))
-            )
-            print("User is live!")
-            return True
-        except TimeoutException:
-            print("Timeout: Live badge not found. User is not live.")
-            logging.error("Timeout: Live badge not found.")
-            return False
+        logging.info("Waiting for live badge to appear.")
+        live_element = WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, ".css-1n3ab5j-SpanLiveBadge.e1vl87hj3"))
+        )
+        logging.info("User is live!")
+        return True
+    except TimeoutException:
+        logging.error("Timeout: Live badge not found. User is not live.")
+        return False
     except Exception as e:
-        print(f"Error occurred while checking TikTok live status: {e}")
         logging.error(f"Error occurred: {e}")
         return False
     finally:
         if driver is not None:
             driver.quit()
-
+            logging.info("Closed the driver.")
 
 # Background task to check if you're live on TikTok every 5 minutes
 
@@ -232,9 +224,11 @@ def sync_check_twitch_live():
 
         # Set up Chrome options
         chrome_options = Options()
-        chrome_options.add_argument("--headless")
+       chrome_options.add_argument("--headless")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--disable-software-rasterizer")
         chrome_options.add_argument("--remote-debugging-port=9222")
 
         service = Service(chrome_driver_path)
