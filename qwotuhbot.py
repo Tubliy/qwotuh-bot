@@ -169,7 +169,7 @@ def sync_check_tiktok_live():
         # Wait for the live badge to appear
         try:
             live_element = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.XPATH, "//*[contains(text(), 'LIVE')]"))
+                EC.presence_of_element_located((By.CSS_SELECTOR, ".css-1n3ab5j-SpanLiveBadge.e1vl87hj3"))
             )
             print("User is live!")
             return True
@@ -224,7 +224,7 @@ def sync_check_twitch_live():
     driver = None 
     try:
         # Your Twitch username
-        twitch_username = "qwotuh"  # Replace with your actual Twitch username
+        twitch_username = "kaicenat"  # Replace with your actual Twitch username
         twitch_url = f"https://www.twitch.tv/{twitch_username}"
 
         # Path to your ChromeDriver
