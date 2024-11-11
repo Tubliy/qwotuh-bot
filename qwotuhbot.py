@@ -1,4 +1,4 @@
-import discord
+'''import discord
 import random
 import yt_dlp
 import asyncio
@@ -17,8 +17,31 @@ import time
 import logging
 import os
 import sys
+'''
+import logging
+import traceback
 
+logging.basicConfig(level=logging.INFO, filename='/home/tubliy/qwotuh-bot/bot.log')
 
+try:
+    # Your bot code here
+    import discord  # Example dependency
+    # Initialize and run the bot as usual
+    # Example of on_ready event
+    client = discord.Client()
+
+    @client.event
+    async def on_ready():
+        logging.info(f"Logged in as {client.user} (ID: {client.user.id})")
+        logging.info("------ Bot is online ------")
+
+    # Run the bot with your token
+    client.run("your_discord_token_here")
+
+except Exception as e:
+    logging.error("An error occurred: " + str(e))
+    logging.error(traceback.format_exc())
+  
 # Define intents
 intents = discord.Intents.default()
 intents.message_content = True  # Enable the message content intent
@@ -205,7 +228,7 @@ async def live_tiktokcheck():
     else:
         print("No change in live status.")
         
-        
+     '''   
 async def check_twitch_live():
     return await asyncio.get_running_loop().run_in_executor(executor, sync_check_twitch_live)
 
@@ -288,7 +311,7 @@ async def live_twitchcheck():
         was_live_twitch = False
     else:
         print("No change in live status.")
-
+'''
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} is online!')
