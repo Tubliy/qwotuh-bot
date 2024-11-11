@@ -62,6 +62,7 @@ TWITCH_URL = 'https://www.twitch.com/qwotuh'
 was_live_tiktok = False
 was_live_twitch = False
 executor = ThreadPoolExecutor(max_workers=2)
+username = 'qwotuh'
 
 COUNT_CHANNEL_ID = 1305085207917105172
 ROLE_TO_TRACK = "Viewers"
@@ -152,82 +153,57 @@ async def poll(ctx, *, question):
     await message.add_reaction("👎")
 
 
-async def check_tiktok_live():
-    return await asyncio.get_running_loop().run_in_executor(executor, sync_check_tiktok_live)
-
 logging.basicConfig(filename='tiktok_live_check.log', level=logging.INFO)
 
-def sync_check_tiktok_live():
-    driver = None
+# Define the function to check if the user is live on TikTok
+def check_tiktok_live(username):
+    tiktok_url = f"https://www.tiktok.com/@{username}"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    }
     try:
-        tiktok_username = "qwotuh"
-        tiktok_url = f"https://www.tiktok.com/@{tiktok_username}"
-        logging.info(f"Checking TikTok live status for {tiktok_username}.")
-
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")
-        #chrome_options.add_argument("--no-sandbox")
-        #chrome_options.add_argument("--disable-dev-shm-usage")
-        chrome_options.add_argument("--disable-gpu")
-        chrome_options.add_argument("--disable-software-rasterizer")
-        chrome_options.add_argument("--remote-debugging-port=9222")
-
-        service = Service(chrome_driver_path)
-        driver = webdriver.Chrome(service=service, options=chrome_options)
-
-        logging.info("Opening TikTok profile page.")
-        driver.get(tiktok_url)
-        logging.info("Scrolling the page to load content.")
-        
-        body = driver.find_element(By.TAG_NAME, 'body')
-        for _ in range(3):
-            body.send_keys(Keys.PAGE_DOWN)
-
-        logging.info("Waiting for live badge to appear.")
-        live_element = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, ".css-1n3ab5j-SpanLiveBadge.e1vl87hj3"))
-        )
-        logging.info("User is live!")
-        return True
-    except TimeoutException:
-        logging.error("Timeout: Live badge not found. User is not live.")
-        return False
+        response = requests.get(tiktok_url, headers=headers)
+        if response.status_code == 200:
+            # Look for keywords indicating live status
+            if "LIVE" in response.text or "live-streaming" in response.text:
+                logging.info(f"{username} is currently live on TikTok.")
+                return True
+            else:
+                logging.info(f"{username} is not live on TikTok.")
+                return False
+        else:
+            logging.error(f"Failed to access TikTok profile page: {response.status_code}")
+            return False
     except Exception as e:
         logging.error(f"Error occurred: {e}")
         return False
-    finally:
-        if driver is not None:
-            driver.quit()
-            logging.info("Closed the driver.")
 
-# Background task to check if you're live on TikTok every 5 minutes
-
+# Task to check if the user is live every 5 minutes
 @tasks.loop(minutes=5)
 async def live_tiktokcheck():
-    global was_live_tiktok  # Access the global live status variable
+    global was_live_tiktok  # Track live status changes
+    username = "qwotuh"
     channel = bot.get_channel(ANNOUNCEMENT_CHANNEL_ID)
 
-    # Check if the channel was found correctly
     if channel is None:
-        print("Channel not found. Make sure ANNOUNCEMENT_CHANNEL_ID is correct.")
+        print("Channel not found. Check ANNOUNCEMENT_CHANNEL_ID.")
         return
 
-    # Check if the user is live
-    is_live = await check_tiktok_live()
-    print(f"Live status: {is_live}")  # Print the live status for debugging
+    # Check live status
+    is_live = check_tiktok_live(username)
+    print(f"Live status: {is_live}")  # Debugging log
 
     # If the user is live and hasn't been announced yet, post the announcement
     if is_live and not was_live_tiktok:
-        print(f"Announcing live status in {channel.name}")
-        await channel.send(f"<@&{ROLE_IDS['Notifications']}> \n🚨 **I'm live on TikTok!** 🚨\nCome watch: {TIKTOK_URL}")
-        was_live_tiktok = True  # Set the flag to True, so it doesn't post again until live status changes
+        await channel.send(f"<@&{ROLE_IDS['Notifications']}> \n🚨 **I'm live on TikTok!** 🚨\nCome watch: https://www.tiktok.com/@{username}")
+        was_live_tiktok = True  # Update live status
     elif not is_live and was_live_tiktok:
-        print("User went offline.")
+        # Set to False when the user goes offline
         was_live_tiktok = False
     else:
         print("No change in live status.")
         
-
+'''
 async def check_twitch_live():
     return await asyncio.get_running_loop().run_in_executor(executor, sync_check_twitch_live)
 
@@ -310,7 +286,7 @@ async def live_twitchcheck():
         was_live_twitch = False
     else:
         print("No change in live status.")
-
+'''
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} is online!')
@@ -319,14 +295,14 @@ async def on_ready():
         update_count.start()
     else:
         print("update_count task is already running.")
-    
+    '''
     # Start the live check task if it's not already running
     if not live_twitchcheck.is_running():
         print("Starting live_twitchcheck task...")
         live_twitchcheck.start()
     else:
         print("live_twitchcheck task is already running.")
-    
+    '''
     if not live_tiktokcheck.is_running():
         print("Starting live_tiktokcheck task...")
         live_tiktokcheck.start()
