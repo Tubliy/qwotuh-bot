@@ -148,8 +148,8 @@ def sync_check_tiktok_live():
         # Set up Chrome options
         chrome_options = Options()
         chrome_options.add_argument("--headless")
-        #chrome_options.add_argument("--no-sandbox")
-        #chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--remote-debugging-port=9222")
 
         service = Service(chrome_driver_path)
@@ -168,7 +168,7 @@ def sync_check_tiktok_live():
 
         # Wait for the live badge to appear
         try:
-            live_element = WebDriverWait(driver, 10).until(
+            live_element = WebDriverWait(driver, 20).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, ".css-1n3ab5j-SpanLiveBadge.e1vl87hj3"))
             )
             print("User is live!")
@@ -233,8 +233,8 @@ def sync_check_twitch_live():
         # Set up Chrome options
         chrome_options = Options()
         chrome_options.add_argument("--headless")
-        #chrome_options.add_argument("--no-sandbox")
-        #chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--remote-debugging-port=9222")
 
         service = Service(chrome_driver_path)
@@ -252,8 +252,9 @@ def sync_check_twitch_live():
 
         # Wait for the live badge to appear
         try:
-            live_element = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.XPATH, "//*[contains(text(), 'LIVE')]"))
+            live_element = WebDriverWait(driver, 20).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, ".ScThumbnailBrowse-featured__live-badge"))
+            )
             )
             print("User is live!")
             return True
