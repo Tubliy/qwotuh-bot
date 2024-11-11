@@ -322,8 +322,8 @@ async def on_ready():
         update_count.start()
     else:
         print("update_count task is already running.")
-
-   ''' # Start the live check task if it's not already running
+    '''
+    # Start the live check task if it's not already running
     if not live_twitchcheck.is_running():
         print("Starting live_twitchcheck task...")
         live_twitchcheck.start()
