@@ -62,7 +62,7 @@ TWITCH_URL = 'https://www.twitch.com/qwotuh'
 was_live_tiktok = False
 was_live_twitch = False
 executor = ThreadPoolExecutor(max_workers=2)
-USERNAME = 'NathanLIVE'
+USERNAME = 'qwotuh'
 
 COUNT_CHANNEL_ID = 1305085207917105172
 ROLE_TO_TRACK = "Viewers"
@@ -185,13 +185,16 @@ def check_tiktok_live(username):
         live_badge = profile_container.find_elements(By.XPATH, "//*[contains(text(),'LIVE')]")
         if live_badge:
             logging.info(f"{username} is currently live on TikTok.")
+            print(f"{username} is currently live on TikTok.")
             return True
         else:
             logging.info(f"{username} is not live on TikTok.")
+            print(f"{username} is not live on TikTok.")
             return False
 
     except Exception as e:
         logging.error(f"Error checking live status for {username}: {e}")
+        print(f"Error in checking live status of (username): {e}")
         return False
     finally:
         driver.quit()
@@ -225,6 +228,7 @@ async def live_tiktokcheck():
                         f"Come watch: https://www.tiktok.com/@{USERNAME}"
                     )
                     logging.info("Live notification sent.")
+                    print("Live notification sent.")
                 except Exception as send_error:
                     logging.error(f"Failed to send live notification: {send_error}")
             else:
@@ -235,11 +239,14 @@ async def live_tiktokcheck():
         elif not is_live and was_live_tiktok:
             was_live_tiktok = False
             logging.info(f"{USERNAME} is now offline.")
+            print(f"{USERNAME} is now offline.")
         else:
             logging.info("No change in live status.")
+            print("No change in live status.")
 
     except Exception as e:
         logging.error(f"Error in live_tiktokcheck task: {e}")
+        print(f"Error in live_tiktokcheck task: {e}")
 
 '''
 async def check_twitch_live():
