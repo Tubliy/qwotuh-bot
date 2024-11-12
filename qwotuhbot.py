@@ -242,6 +242,7 @@ def sync_check_twitch_live():
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--disable-software-rasterizer")
         chrome_options.add_argument("--remote-debugging-port=9222")
+        chrome_options.add_argument("--window-size=1920,1080")
 
         service = Service(chrome_driver_path)
         driver = webdriver.Chrome(service=service, options=chrome_options)
