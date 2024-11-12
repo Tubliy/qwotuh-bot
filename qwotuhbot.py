@@ -62,7 +62,7 @@ TWITCH_URL = 'https://www.twitch.com/qwotuh'
 was_live_tiktok = False
 was_live_twitch = False
 executor = ThreadPoolExecutor(max_workers=2)
-USERNAME = 'nathanliveclips'
+USERNAME = 'qwotuh'
 
 COUNT_CHANNEL_ID = 1305085207917105172
 ROLE_TO_TRACK = "Viewers"
