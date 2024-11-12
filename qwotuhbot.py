@@ -365,19 +365,13 @@ async def restart_error(ctx, error):
 # Command to manually check live status
 @bot.command()
 async def livetest(ctx):
-    is_live = await check_tiktok_live()
-    is_live2 = await check_twitch_live()
-
-    # Check if both are live first
-    if is_live and is_live2:
-        await ctx.send(f"🚨 **I'm currently live on both** 🚨\nCome watch:\nTikTok: {TIKTOK_URL}\nTwitch: {TWITCH_URL}")
-    elif is_live:
-        await ctx.send(f"🚨 **I'm live on TikTok!** 🚨\nCome watch: {TIKTOK_URL}")
-    elif is_live2:
-        await ctx.send(f"🚨 **I'm live on Twitch!** 🚨\nCome watch: {TWITCH_URL}")
+    # Make sure to pass the username when calling the async wrapper
+    is_live = await async_check_tiktok_live(USERNAME)  # Pass the `USERNAME` variable here
+    if is_live:
+        await ctx.send(f"{USERNAME} is currently live on TikTok!")
     else:
-        await ctx.send("I'm not live on TikTok or Twitch right now.")
-   
+        await ctx.send(f"{USERNAME} is not live on TikTok.")
+
 
 @bot.command()
 async def ppsize(ctx):
