@@ -10,7 +10,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException, WebDriverException
 from selenium.webdriver.common.keys import Keys
 from concurrent.futures import ThreadPoolExecutor
 import time
@@ -155,7 +155,9 @@ async def poll(ctx, *, question):
 def check_tiktok_live(username):
     """Check if the TikTok user is live."""
     tiktok_url = f"https://www.tiktok.com/@{username}"
-    
+    logging.info(f"Attempting to check live status for {username} at {tiktok_url}")
+    print(f"[INFO] Checking live status for {username} at {tiktok_url}")
+
     # Set up Chrome options
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -168,36 +170,60 @@ def check_tiktok_live(username):
     # Define ChromeDriver path
     chrome_driver_path = "/usr/local/bin/chromedriver"
     service = Service(chrome_driver_path)
-    
-    # Initialize WebDriver
-    driver = webdriver.Chrome(service=service, options=chrome_options)
 
     try:
+        # Initialize WebDriver
+        driver = webdriver.Chrome(service=service, options=chrome_options)
+        logging.info("WebDriver initialized successfully.")
+        print("[INFO] WebDriver initialized successfully.")
+
+        # Open the TikTok URL
         driver.get(tiktok_url)
-        logging.info(f"Opened URL: {tiktok_url}")
-        
+        logging.info(f"Page loaded for {username}")
+        print(f"[INFO] Page loaded for {username}")
+
         # Wait for the profile container to load
-        profile_container = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, ".profile-container"))
-        )
-        
-        # Check for the 'LIVE' badge
+        try:
+            profile_container = WebDriverWait(driver, 20).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, ".profile-container"))
+            )
+            logging.info("Profile container found.")
+            print("[INFO] Profile container found.")
+        except TimeoutException:
+            logging.error("Timed out waiting for profile container.")
+            print("[ERROR] Timed out waiting for profile container.")
+            return False
+
+        # Check for the 'LIVE' badge within the profile container
         live_badge = profile_container.find_elements(By.XPATH, "//*[contains(text(),'LIVE')]")
         if live_badge:
             logging.info(f"{username} is currently live on TikTok.")
-            print(f"{username} is currently live on TikTok.")
+            print(f"[INFO] {username} is currently live on TikTok.")
             return True
         else:
             logging.info(f"{username} is not live on TikTok.")
-            print(f"{username} is not live on TikTok.")
+            print(f"[INFO] {username} is not live on TikTok.")
             return False
 
-    except Exception as e:
-        logging.error(f"Error checking live status for {username}: {e}")
-        print(f"Error in checking live status of (username): {e}")
+    except WebDriverException as e:
+        logging.error(f"WebDriver error while checking live status for {username}: {e}")
+        print(f"[ERROR] WebDriver error: {e}")
         return False
+
+    except Exception as e:
+        logging.error(f"Unexpected error while checking live status for {username}: {e}")
+        print(f"[ERROR] Unexpected error: {e}")
+        return False
+
     finally:
-        driver.quit()
+        # Quit the driver
+        try:
+            driver.quit()
+            logging.info("WebDriver session ended.")
+            print("[INFO] WebDriver session ended.")
+        except Exception as quit_error:
+            logging.error(f"Error quitting WebDriver: {quit_error}")
+            print(f"[ERROR] Error quitting WebDriver: {quit_error}")
 
 async def async_check_tiktok_live(username):
     """Asynchronous wrapper to check if the TikTok user is live."""
