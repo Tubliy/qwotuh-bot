@@ -184,14 +184,17 @@ def check_tiktok_live(username):
 
         # Wait for the profile container to load
         try:
-            profile_container = WebDriverWait(driver, 20).until(
+            profile_container = WebDriverWait(driver, 30).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, ".profile-container"))
             )
             logging.info("Profile container found.")
             print("[INFO] Profile container found.")
         except TimeoutException:
+            # Print the page source if the profile container is not found
+            page_source = driver.page_source
             logging.error("Timed out waiting for profile container.")
             print("[ERROR] Timed out waiting for profile container.")
+            print("[DEBUG] Page Source:\n", page_source[:1000])  # Print the first 1000 characters of the page source for debugging
             return False
 
         # Check for the 'LIVE' badge within the profile container
@@ -224,6 +227,7 @@ def check_tiktok_live(username):
         except Exception as quit_error:
             logging.error(f"Error quitting WebDriver: {quit_error}")
             print(f"[ERROR] Error quitting WebDriver: {quit_error}")
+
 
 async def async_check_tiktok_live(username):
     """Asynchronous wrapper to check if the TikTok user is live."""
