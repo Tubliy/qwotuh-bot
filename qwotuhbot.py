@@ -152,11 +152,11 @@ async def poll(ctx, *, question):
     await message.add_reaction("👍")
     await message.add_reaction("👎")
 
-async def async_check_tiktok_live(username):
-    return await asyncio.to_thread(check_tiktok_live, username)
-    
 def check_tiktok_live(username):
+    """Check if the TikTok user is live."""
     tiktok_url = f"https://www.tiktok.com/@{username}"
+    
+    # Set up Chrome options
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
@@ -165,20 +165,23 @@ def check_tiktok_live(username):
     chrome_options.add_argument("--disable-software-rasterizer")
     chrome_options.add_argument("--remote-debugging-port=9222")
 
-    # Update the ChromeDriver path as needed
+    # Define ChromeDriver path
     chrome_driver_path = "/usr/local/bin/chromedriver"
     service = Service(chrome_driver_path)
+    
+    # Initialize WebDriver
     driver = webdriver.Chrome(service=service, options=chrome_options)
 
     try:
         driver.get(tiktok_url)
-
-        # Wait for the profile container to load and check for a live badge within it
+        logging.info(f"Opened URL: {tiktok_url}")
+        
+        # Wait for the profile container to load
         profile_container = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".profile-container"))
         )
-
-        # Look for a live badge within the profile container only
+        
+        # Check for the 'LIVE' badge
         live_badge = profile_container.find_elements(By.XPATH, "//*[contains(text(),'LIVE')]")
         if live_badge:
             logging.info(f"{username} is currently live on TikTok.")
@@ -188,14 +191,19 @@ def check_tiktok_live(username):
             return False
 
     except Exception as e:
-        logging.error(f"Error checking live status: {e}")
+        logging.error(f"Error checking live status for {username}: {e}")
         return False
     finally:
         driver.quit()
 
+async def async_check_tiktok_live(username):
+    """Asynchronous wrapper to check if the TikTok user is live."""
+    return await asyncio.to_thread(check_tiktok_live, username)
+
 # Background task to check if the TikTok user is live every 5 minutes
 @tasks.loop(minutes=5)
 async def live_tiktokcheck():
+    """Checks if the TikTok user is live and sends a notification if status changes."""
     global was_live_tiktok
     channel = bot.get_channel(ANNOUNCEMENT_CHANNEL_ID)
 
@@ -203,20 +211,36 @@ async def live_tiktokcheck():
         logging.error("Channel not found. Check ANNOUNCEMENT_CHANNEL_ID.")
         return
 
-    # Check live status asynchronously
-    is_live = await async_check_tiktok_live(USERNAME)
-    logging.info(f"Live status for {USERNAME}: {is_live}")
+    try:
+        # Check live status asynchronously
+        is_live = await async_check_tiktok_live(USERNAME)
+        logging.info(f"Live status for {USERNAME}: {is_live}")
 
-    if is_live and not was_live_tiktok:
-        if "Notifications" in ROLE_IDS:
-            await channel.send(f"<@&{ROLE_IDS['Notifications']}> \n🚨 **I'm live on TikTok!** 🚨\nCome watch: https://www.tiktok.com/@{USERNAME}")
+        # Send notification if the user has just gone live
+        if is_live and not was_live_tiktok:
+            if "Notifications" in ROLE_IDS:
+                try:
+                    await channel.send(
+                        f"<@&{ROLE_IDS['Notifications']}> \n🚨 **I'm live on TikTok!** 🚨\n"
+                        f"Come watch: https://www.tiktok.com/@{USERNAME}"
+                    )
+                    logging.info("Live notification sent.")
+                except Exception as send_error:
+                    logging.error(f"Failed to send live notification: {send_error}")
+            else:
+                logging.warning("Notification role ID not found.")
+            was_live_tiktok = True
+
+        # Update live status if the user has gone offline
+        elif not is_live and was_live_tiktok:
+            was_live_tiktok = False
+            logging.info(f"{USERNAME} is now offline.")
         else:
-            logging.warning("Notification role ID not found.")
-        was_live_tiktok = True
-    elif not is_live and was_live_tiktok:
-        was_live_tiktok = False
-    else:
-        logging.info("No change in live status.")
+            logging.info("No change in live status.")
+
+    except Exception as e:
+        logging.error(f"Error in live_tiktokcheck task: {e}")
+
 '''
 async def check_twitch_live():
     return await asyncio.get_running_loop().run_in_executor(executor, sync_check_twitch_live)
