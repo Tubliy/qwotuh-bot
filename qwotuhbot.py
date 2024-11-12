@@ -17,7 +17,6 @@ import time
 import logging
 import os
 import sys
-import logging
 import traceback
 import re
 
