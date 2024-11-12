@@ -164,6 +164,7 @@ def check_tiktok_live(username):
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--disable-software-rasterizer")
+    chrome_options.add_argument("--remote-debugging-port=9222")
 
     # Update the ChromeDriver path as needed
     chrome_driver_path = "/usr/local/bin/chromedriver"
