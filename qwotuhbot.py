@@ -153,7 +153,7 @@ async def poll(ctx, *, question):
     await message.add_reaction("👎")
 
 def check_tiktok_live(username):
-    """Check if the TikTok user is live."""
+    """Check if the TikTok user is live by looking for the live badge."""
     tiktok_url = f"https://www.tiktok.com/@{username}"
     logging.info(f"Attempting to check live status for {username} at {tiktok_url}")
     print(f"[INFO] Checking live status for {username} at {tiktok_url}")
@@ -183,39 +183,16 @@ def check_tiktok_live(username):
         logging.info(f"Page loaded for {username}")
         print(f"[INFO] Page loaded for {username}")
 
-        # Check for iframes and switch if necessary
-        iframes = driver.find_elements(By.TAG_NAME, "iframe")
-        if iframes:
-            print("[INFO] iFrame detected. Switching to iFrame.")
-            driver.switch_to.frame(iframes[0])
-        else:
-            print("[INFO] No iFrame detected.")
-
-        # Save a screenshot for debugging purposes
-        driver.save_screenshot("tiktok_page.png")
-        print("[INFO] Screenshot saved as tiktok_page.png.")
-
-        # Wait for the profile container to load
+        # Wait for the live badge element to load
         try:
-            profile_container = WebDriverWait(driver, 30).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, ".profile-container"))
+            live_badge = WebDriverWait(driver, 30).until(
+                EC.presence_of_element_located((By.CLASS_NAME, "css-1n3ab5j-SpanLiveBadge"))
             )
-            logging.info("Profile container found.")
-            print("[INFO] Profile container found.")
+            logging.info("Live badge found.")
+            print("[INFO] Live badge found.")
+            return True  # User is live
         except TimeoutException:
-            page_source = driver.page_source
-            logging.error("Timed out waiting for profile container.")
-            print("[ERROR] Timed out waiting for profile container.")
-            print("[DEBUG] Page Source:\n", page_source[:1000])  # Print part of the page source for debugging
-            return False
-
-        # Check for the 'LIVE' badge within the profile container
-        live_badge = profile_container.find_elements(By.XPATH, "//*[contains(text(),'LIVE')]")
-        if live_badge:
-            logging.info(f"{username} is currently live on TikTok.")
-            print(f"[INFO] {username} is currently live on TikTok.")
-            return True
-        else:
+            # If the live badge does not appear
             logging.info(f"{username} is not live on TikTok.")
             print(f"[INFO] {username} is not live on TikTok.")
             return False
