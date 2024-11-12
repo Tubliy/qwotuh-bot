@@ -166,6 +166,7 @@ def check_tiktok_live(username):
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--disable-software-rasterizer")
     chrome_options.add_argument("--remote-debugging-port=9222")
+    chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
 
     # Define ChromeDriver path
     chrome_driver_path = "/usr/local/bin/chromedriver"
@@ -182,6 +183,18 @@ def check_tiktok_live(username):
         logging.info(f"Page loaded for {username}")
         print(f"[INFO] Page loaded for {username}")
 
+        # Check for iframes and switch if necessary
+        iframes = driver.find_elements(By.TAG_NAME, "iframe")
+        if iframes:
+            print("[INFO] iFrame detected. Switching to iFrame.")
+            driver.switch_to.frame(iframes[0])
+        else:
+            print("[INFO] No iFrame detected.")
+
+        # Save a screenshot for debugging purposes
+        driver.save_screenshot("tiktok_page.png")
+        print("[INFO] Screenshot saved as tiktok_page.png.")
+
         # Wait for the profile container to load
         try:
             profile_container = WebDriverWait(driver, 30).until(
@@ -190,11 +203,10 @@ def check_tiktok_live(username):
             logging.info("Profile container found.")
             print("[INFO] Profile container found.")
         except TimeoutException:
-            # Print the page source if the profile container is not found
             page_source = driver.page_source
             logging.error("Timed out waiting for profile container.")
             print("[ERROR] Timed out waiting for profile container.")
-            print("[DEBUG] Page Source:\n", page_source[:1000])  # Print the first 1000 characters of the page source for debugging
+            print("[DEBUG] Page Source:\n", page_source[:1000])  # Print part of the page source for debugging
             return False
 
         # Check for the 'LIVE' badge within the profile container
