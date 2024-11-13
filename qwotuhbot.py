@@ -698,6 +698,9 @@ async def on_message(message):
     if leveled_up:
         # Pass the full `message` object to `level_up_announcement`
         await level_up_announcement(message, xp_data[user_id]["level"], xp_data[user_id]["prestige"])
+    
+    await bot.process_commands(message)
+  
 
 bot.remove_command('help')
 
