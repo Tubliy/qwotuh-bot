@@ -19,8 +19,130 @@ import os
 import sys
 import traceback
 import re
+import math
+import json
 
 logging.basicConfig(level=logging.INFO, filename='/home/tubliy/qwotuh-bot/bot.log')
+
+try:
+    with open("xp_data.json", "r") as f:
+        xp_data = json.load(f)
+except FileNotFoundError:
+    xp_data = {}
+
+# Prestige ranks
+prestige_ranks = {
+    1: "Prestige 1",
+    2: "Prestige 2",
+    3: "Prestige 3",
+    4: "Prestige 4",
+    5: "Prestige 5",
+    6: "Prestige 6",
+    7: "Prestige 7",
+    8: "Prestige 8",
+    9: "Prestige 9",
+    10: "Master Prestige"
+}
+
+# XP bar function to show progress towards the next level
+def xp_bar(current_xp, level_up_xp, bar_length=20):
+    progress = min(current_xp / level_up_xp, 1)
+    filled_length = int(bar_length * progress)
+    bar = "█" * filled_length + "-" * (bar_length - filled_length)
+    return f"[{bar}] {int(progress * 100)}%"
+
+# Updated level-up announcement with role assignment based on prestige
+async def level_up_announcement(ctx, level, prestige):
+    guild = ctx.guild  # The Discord server (guild) where the bot is active
+
+    # Determine the prestige rank and role name
+    prestige_rank_name = prestige_ranks.get(prestige, "Master Prestige")
+    role = discord.utils.get(guild.roles, name=prestige_rank_name)
+    
+    # Assign the role if it exists and hasn't already been assigned
+    if role and role not in ctx.author.roles:
+        await ctx.author.add_roles(role)
+        await ctx.send(f"{ctx.author.mention} has been granted the **{prestige_rank_name}** rank!")
+
+    # Send the level-up announcement
+    embed = discord.Embed(
+        title="🎉 Level Up! 🎉",
+        description=f"Congratulations {ctx.author.mention}, you've reached **Level {level}**!",
+        color=discord.Color.gold()
+    )
+    if prestige > 0:
+        embed.set_footer(text=f"Prestige Rank: {prestige_rank_name}")
+    embed.set_thumbnail(url=ctx.author.avatar.url)
+    embed.add_field(name="Keep going!", value="Each message brings you closer to the next level.", inline=False)
+    await ctx.send(embed=embed)
+
+
+# Function to add XP and check for level-ups
+def add_xp(user_id):
+    if user_id not in xp_data:
+        xp_data[user_id] = {"xp": 0, "level": 1, "prestige": 0}
+
+    xp_data[user_id]["xp"] += 10  # Adjust XP gain per message
+
+    # Progressive XP required for each level
+    level_up_xp = 100 * (1.5 ** (xp_data[user_id]["level"] - 1))
+    
+    # Check for level-up
+    if xp_data[user_id]["xp"] >= level_up_xp:
+        xp_data[user_id]["xp"] = 0
+        xp_data[user_id]["level"] += 1
+        
+        # Check for prestige
+        if xp_data[user_id]["level"] > 55:
+            xp_data[user_id]["level"] = 1
+            if xp_data[user_id]["prestige"] < 10:
+                xp_data[user_id]["prestige"] += 1
+
+        return True  # Indicates a level-up occurred
+
+    # Save updated XP data
+    with open("xp_data.json", "w") as f:
+        json.dump(xp_data, f)
+
+    return False  # No level-up
+
+# Listen for messages to give XP
+@bot.event
+async def on_message(message):
+    if message.author.bot:
+        return
+
+    user_id = str(message.author.id)
+    leveled_up = add_xp(user_id)
+    if leveled_up:
+        await level_up_announcement(message.channel, xp_data[user_id]["level"], xp_data[user_id]["prestige"])
+
+    await bot.process_commands(message)
+
+# Command to check user's level, prestige, and XP bar
+@bot.command()
+async def rank(ctx):
+    user_id = str(ctx.author.id)
+    if user_id in xp_data:
+        current_xp = xp_data[user_id]["xp"]
+        level = xp_data[user_id]["level"]
+        prestige = xp_data[user_id]["prestige"]
+        level_up_xp = 100 * (1.5 ** (level - 1))  # Adjusted XP for the next level
+        
+        # Get XP bar and embed
+        bar = xp_bar(current_xp, level_up_xp)
+        embed = discord.Embed(
+            title=f"{ctx.author.display_name}'s Rank",
+            color=discord.Color.blue()
+        )
+        embed.add_field(name="Level", value=f"{level}", inline=True)
+        embed.add_field(name="Prestige", value=prestige_ranks.get(prestige, "Master Prestige"), inline=True)
+        embed.add_field(name="XP", value=f"{current_xp}/{int(level_up_xp)}", inline=True)
+        embed.add_field(name="Progress", value=bar, inline=False)
+        
+        await ctx.send(embed=embed)
+    else:
+        await ctx.send("You have no levels yet. Start chatting to gain XP!")
 
 try:
     # Your bot code here
@@ -538,6 +660,16 @@ async def on_message(message):
             return  # Return here to stop further processing for this message if banned
 
     # Make sure to process other bot commands
+    await bot.process_commands(message)
+    
+    if message.author.bot:
+        return
+
+    user_id = str(message.author.id)
+    leveled_up = add_xp(user_id)
+    if leveled_up:
+        await level_up_announcement(message.channel, xp_data[user_id]["level"], xp_data[user_id]["prestige"])
+
     await bot.process_commands(message)
 
 bot.remove_command('help')
