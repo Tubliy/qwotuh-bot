@@ -185,9 +185,22 @@ async def setlevel(ctx, member: discord.Member, level: int):
     with open("xp_data.json", "w") as f:
         json.dump(xp_data, f)
     
-    # Send a confirmation message
+    # Assign the appropriate prestige role
     prestige_name = prestige_ranks.get(prestige, "Master Prestige")
-    await ctx.send(f"{member.mention}'s level has been set to {adjusted_level} with prestige rank: {prestige_name}.")
+    role = discord.utils.get(ctx.guild.roles, name=prestige_name)
+    if role:
+        # Remove any existing prestige roles
+        for prestige_role in prestige_ranks.values():
+            existing_role = discord.utils.get(ctx.guild.roles, name=prestige_role)
+            if existing_role and existing_role in member.roles:
+                await member.remove_roles(existing_role)
+        
+        # Add the new prestige role
+        await member.add_roles(role)
+        await ctx.send(f"{member.mention}'s level has been set to {adjusted_level} with prestige rank: {prestige_name}. Role has been updated.")
+    else:
+        await ctx.send(f"{prestige_name} role does not exist on this server. Please create it to assign roles properly.")
+
 
 @tasks.loop(minutes=5)
 async def update_count():
