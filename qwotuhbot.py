@@ -133,7 +133,6 @@ def add_xp(user_id):
 # Command to check user's level, prestige, and XP bar
 @bot.command()
 async def rank(ctx, member: discord.Member = None):
-    # Use the mentioned member or the command author as the target
     target = member or ctx.author
     user_id = str(target.id)
     
@@ -142,6 +141,12 @@ async def rank(ctx, member: discord.Member = None):
         level = xp_data[user_id]["level"]
         prestige = xp_data[user_id]["prestige"]
         level_up_xp = 100 * (1.5 ** (level - 1))  # Adjusted XP for the next level
+
+        # Ensure prestige ranks display correctly, without defaulting to "Master Prestige"
+        if prestige < 10:
+            prestige_name = prestige_ranks.get(prestige, f"Prestige {prestige}")
+        else:
+            prestige_name = "Master Prestige"
         
         # Get XP bar and embed
         bar = xp_bar(current_xp, level_up_xp)
@@ -150,13 +155,14 @@ async def rank(ctx, member: discord.Member = None):
             color=discord.Color.blue()
         )
         embed.add_field(name="Level", value=f"{level}", inline=True)
-        embed.add_field(name="Prestige", value=prestige_ranks.get(prestige, "Master Prestige"), inline=True)
+        embed.add_field(name="Prestige", value=prestige_name, inline=True)
         embed.add_field(name="XP", value=f"{current_xp}/{int(level_up_xp)}", inline=True)
         embed.add_field(name="Progress", value=bar, inline=False)
         
         await ctx.send(embed=embed)
     else:
         await ctx.send(f"{target.display_name} has no levels yet. Start chatting to gain XP!")
+
 
 @tasks.loop(minutes=5)
 async def update_count():
