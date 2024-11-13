@@ -307,11 +307,11 @@ def check_tiktok_live(username):
     chrome_driver_path = os.getenv("chrome_driver_path")
 
 # Initialize the WebDriver with the path from the environment variable
-  chrome_options = webdriver.ChromeOptions()
-  chrome_options.binary_location = "/usr/bin/google-chrome"  # Adjust this path if needed
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.binary_location = "/usr/bin/google-chrome"  # Adjust this path if needed
 
 # Create WebDriver instance
-  driver = webdriver.Chrome(executable_path=chrome_driver_path, options=chrome_options)
+    driver = webdriver.Chrome(executable_path=chrome_driver_path, options=chrome_options)
   
 
     try:
