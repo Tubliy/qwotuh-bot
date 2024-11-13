@@ -162,7 +162,32 @@ async def rank(ctx, member: discord.Member = None):
         await ctx.send(embed=embed)
     else:
         await ctx.send(f"{target.display_name} has no levels yet. Start chatting to gain XP!")
-
+      
+@bot.command()
+@commands.has_permissions(administrator=True)  # Restrict this command to administrators
+async def setlevel(ctx, member: discord.Member, level: int):
+    user_id = str(member.id)
+    
+    # Calculate prestige and level within that prestige
+    max_level = 55
+    prestige = min(level // max_level, 10)  # Cap at 10 for Master Prestige
+    adjusted_level = level % max_level if prestige < 10 else max_level  # Keep level within 1-55 for non-master prestige
+    
+    # Ensure xp_data is initialized for the user
+    if user_id not in xp_data:
+        xp_data[user_id] = {"xp": 0, "level": 1, "prestige": 0}
+    
+    # Set the level and prestige
+    xp_data[user_id]["level"] = adjusted_level
+    xp_data[user_id]["prestige"] = prestige
+    
+    # Save updated data
+    with open("xp_data.json", "w") as f:
+        json.dump(xp_data, f)
+    
+    # Send a confirmation message
+    prestige_name = prestige_ranks.get(prestige, "Master Prestige")
+    await ctx.send(f"{member.mention}'s level has been set to {adjusted_level} with prestige rank: {prestige_name}.")
 
 @tasks.loop(minutes=5)
 async def update_count():
