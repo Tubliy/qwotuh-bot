@@ -651,7 +651,7 @@ async def on_message(message):
 
             user_id = str(message.author.id)
             leveled_up = add_xp(user_id)
-         if leveled_up:
+        if leveled_up:
             await level_up_announcement(message.channel, xp_data[user_id]["level"], xp_data[user_id]["prestige"])
 
     await bot.process_commands(message)
