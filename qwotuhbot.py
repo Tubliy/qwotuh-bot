@@ -79,6 +79,13 @@ def xp_bar(current_xp, level_up_xp, bar_length=20):
 async def level_up_announcement(ctx, level, prestige):
     guild = ctx.guild  # The Discord server (guild) where the bot is active
 
+    # Determine the prestiasync def level_up_announcement(ctx, level, prestige):
+    # Only congratulate on multiples of 10
+    if level % 10 != 0:
+        return  # Exit the function if the level isn't a multiple of 10
+
+    guild = ctx.guild  # The Discord server (guild) where the bot is active
+
     # Determine the prestige rank and role name
     prestige_rank_name = prestige_ranks.get(prestige, "Master Prestige")
     role = discord.utils.get(guild.roles, name=prestige_rank_name)
