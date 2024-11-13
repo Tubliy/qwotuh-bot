@@ -107,7 +107,7 @@ def add_xp(user_id):
     return False  # No level-up
 
 # Command to check user's level, prestige, and XP bar
- @bot.command()
+@bot.command()
 async def rank(ctx, member: discord.Member = None):
     # Use the mentioned member or the command author as the target
     target = member or ctx.author
