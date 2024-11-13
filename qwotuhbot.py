@@ -67,6 +67,18 @@ prestige_ranks = {
     9: "Prestige 9",
     10: "Master Prestige"
 }
+prestige_icons = {
+    1: "https://cdn.discordapp.com/attachments/1306125326124060682/1306125654647111730/Prestige_1.png",
+    2: "https://cdn.discordapp.com/attachments/1306125326124060682/1306126835125584052/Prestige_2.png",
+    3: "https://cdn.discordapp.com/attachments/1306125326124060682/1306128540663812127/Prestige_3.png",
+    4: "https://cdn.discordapp.com/attachments/1306125326124060682/1306128564109971466/Prestige_4.png",
+    5: "https://cdn.discordapp.com/attachments/1306125326124060682/1306128596280147968/Prestige_5.png",
+    6: "https://cdn.discordapp.com/attachments/1306125326124060682/1306130743130591243/Prestige_6.png",
+    7: "https://cdn.discordapp.com/attachments/1306125326124060682/1306131015038668850/Prestige_7.png",
+    8: "https://cdn.discordapp.com/attachments/1306125326124060682/1306131052435214366/Prestige_8.png",
+    9: "https://cdn.discordapp.com/attachments/1306125326124060682/1306131076384555051/Prestige_9.png",
+    10: "https://cdn.discordapp.com/attachments/1306125326124060682/1306131105413333013/Master_Prestige.png"
+}
 
 # XP bar function to show progress towards the next level
 def xp_bar(current_xp, level_up_xp, bar_length=20):
@@ -134,7 +146,6 @@ def add_xp(user_id):
 
     return False  # No level-up
 
-# Command to check user's level, prestige, and XP bar
 @bot.command()
 async def rank(ctx, member: discord.Member = None):
     target = member or ctx.author
@@ -145,21 +156,27 @@ async def rank(ctx, member: discord.Member = None):
         level = xp_data[user_id]["level"]
         prestige = xp_data[user_id]["prestige"]
         level_up_xp = 100 * (1.5 ** (level - 1))  # Adjusted XP for the next level
-
-        # Ensure prestige ranks display correctly, without defaulting to "Master Prestige"
-        if prestige < 10:
-            prestige_name = prestige_ranks.get(prestige, f"Prestige {prestige}")
-        else:
-            prestige_name = "Master Prestige"
         
-        # Get XP bar and embed
+        # Determine prestige display and icon
+        if prestige == 0:
+            prestige_display = "Prestige 0"  # Text for non-prestiged users
+            icon_url = None  # No icon
+        else:
+            prestige_display = prestige_ranks.get(prestige, f"Prestige {prestige}")  # Defaults to "Prestige X" if missing
+            icon_url = prestige_icons.get(prestige, prestige_icons.get(10))  # Uses Master Prestige icon as final fallback
+
+        # Create XP bar
         bar = xp_bar(current_xp, level_up_xp)
+        
+        # Embed rank information with badge icon if available
         embed = discord.Embed(
             title=f"{target.display_name}'s Rank",
             color=discord.Color.blue()
         )
+        if icon_url:  # Only set thumbnail if prestige is 1 or higher
+            embed.set_thumbnail(url=icon_url)
         embed.add_field(name="Level", value=f"{level}", inline=True)
-        embed.add_field(name="Prestige", value=prestige_name, inline=True)
+        embed.add_field(name="Prestige", value=prestige_display, inline=True)
         embed.add_field(name="XP", value=f"{current_xp}/{int(level_up_xp)}", inline=True)
         embed.add_field(name="Progress", value=bar, inline=False)
         
