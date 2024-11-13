@@ -107,29 +107,29 @@ def add_xp(user_id):
     return False  # No level-up
 
 # Command to check user's level, prestige, and XP bar
-@bot.command()
-async def rank(ctx):
-    user_id = str(ctx.author.id)
-    if user_id in xp_data:
-        current_xp = xp_data[user_id]["xp"]
-        level = xp_data[user_id]["level"]
-        prestige = xp_data[user_id]["prestige"]
-        level_up_xp = 100 * (1.5 ** (level - 1))  # Adjusted XP for the next level
+    @bot.command()
+    async def rank(ctx):
+        user_id = str(ctx.author.id)
+        if user_id in xp_data:
+            current_xp = xp_data[user_id]["xp"]
+            level = xp_data[user_id]["level"]
+            prestige = xp_data[user_id]["prestige"]
+            level_up_xp = 100 * (1.5 ** (level - 1))  # Adjusted XP for the next level
         
         # Get XP bar and embed
-        bar = xp_bar(current_xp, level_up_xp)
-        embed = discord.Embed(
-            title=f"{ctx.author.display_name}'s Rank",
-            color=discord.Color.blue()
-        )
-        embed.add_field(name="Level", value=f"{level}", inline=True)
-        embed.add_field(name="Prestige", value=prestige_ranks.get(prestige, "Master Prestige"), inline=True)
-        embed.add_field(name="XP", value=f"{current_xp}/{int(level_up_xp)}", inline=True)
-        embed.add_field(name="Progress", value=bar, inline=False)
+            bar = xp_bar(current_xp, level_up_xp)
+            embed = discord.Embed(
+                title=f"{ctx.author.display_name}'s Rank",
+                color=discord.Color.blue()
+            )
+            embed.add_field(name="Level", value=f"{level}", inline=True)
+            embed.add_field(name="Prestige", value=prestige_ranks.get(prestige, "Master Prestige"), inline=True)
+            embed.add_field(name="XP", value=f"{current_xp}/{int(level_up_xp)}", inline=True)
+            embed.add_field(name="Progress", value=bar, inline=False)
         
-        await ctx.send(embed=embed)
-    else:
-        await ctx.send("You have no levels yet. Start chatting to gain XP!")
+            await ctx.send(embed=embed)
+        else:
+            await ctx.send("You have no levels yet. Start chatting to gain XP!")
 
 try:
     # Your bot code here
