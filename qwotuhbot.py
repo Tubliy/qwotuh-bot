@@ -287,6 +287,16 @@ async def poll(ctx, *, question):
     await message.add_reaction("👍")
     await message.add_reaction("👎")
 
+import os
+import logging
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException, WebDriverException
+
 def check_tiktok_live(username):
     """Check if the TikTok user is live by looking for the live badge."""
     tiktok_url = f"https://www.tiktok.com/@{username}"
@@ -305,10 +315,13 @@ def check_tiktok_live(username):
 
     # Define ChromeDriver path from environment
     chrome_driver_path = os.getenv("chrome_driver_path", "/usr/local/bin/chromedriver")
+    
+    # Set up the ChromeDriver Service
+    service = Service(chrome_driver_path)
 
     # Create WebDriver instance
     try:
-        driver = webdriver.Chrome(executable_path=chrome_driver_path, options=chrome_options)
+        driver = webdriver.Chrome(service=service, options=chrome_options)
         logging.info("WebDriver initialized successfully.")
         print("[INFO] WebDriver initialized successfully.")
 
@@ -342,14 +355,16 @@ def check_tiktok_live(username):
         return False
 
     finally:
-        # Quit the driver
-        try:
-            driver.quit()
-            logging.info("WebDriver session ended.")
-            print("[INFO] WebDriver session ended.")
-        except Exception as quit_error:
-            logging.error(f"Error quitting WebDriver: {quit_error}")
-            print(f"[ERROR] Error quitting WebDriver: {quit_error}")
+        # Quit the driver if it was created
+        if 'driver' in locals():
+            try:
+                driver.quit()
+                logging.info("WebDriver session ended.")
+                print("[INFO] WebDriver session ended.")
+            except Exception as quit_error:
+                logging.error(f"Error quitting WebDriver: {quit_error}")
+                print(f"[ERROR] Error quitting WebDriver: {quit_error}")
+
 
 
 async def async_check_tiktok_live(username):
