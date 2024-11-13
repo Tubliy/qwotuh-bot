@@ -75,37 +75,34 @@ def xp_bar(current_xp, level_up_xp, bar_length=20):
     bar = "█" * filled_length + "-" * (bar_length - filled_length)
     return f"[{bar}] {int(progress * 100)}%"
 
-# Updated level-up announcement with role assignment based on prestige
-async def level_up_announcement(ctx, level, prestige):
-    guild = ctx.guild  # The Discord server (guild) where the bot is active
-
-    # Determine the prestiasync def level_up_announcement(ctx, level, prestige):
+async def level_up_announcement(message, level, prestige):
     # Only congratulate on multiples of 10
     if level % 10 != 0:
         return  # Exit the function if the level isn't a multiple of 10
 
-    guild = ctx.guild  # The Discord server (guild) where the bot is active
+    guild = message.guild  # The Discord server (guild) where the bot is active
 
     # Determine the prestige rank and role name
     prestige_rank_name = prestige_ranks.get(prestige, "Master Prestige")
     role = discord.utils.get(guild.roles, name=prestige_rank_name)
     
     # Assign the role if it exists and hasn't already been assigned
-    if role and role not in ctx.author.roles:
-        await ctx.author.add_roles(role)
-        await ctx.send(f"{ctx.author.mention} has been granted the **{prestige_rank_name}** rank!")
+    if role and role not in message.author.roles:
+        await message.author.add_roles(role)
+        await message.channel.send(f"{message.author.mention} has been granted the **{prestige_rank_name}** rank!")
 
     # Send the level-up announcement
     embed = discord.Embed(
         title="🎉 Level Up! 🎉",
-        description=f"Congratulations {ctx.author.mention}, you've reached **Level {level}**!",
+        description=f"Congratulations {message.author.mention}, you've reached **Level {level}**!",
         color=discord.Color.gold()
     )
     if prestige > 0:
         embed.set_footer(text=f"Prestige Rank: {prestige_rank_name}")
-    embed.set_thumbnail(url=ctx.author.avatar.url)
+    embed.set_thumbnail(url=message.author.avatar.url)
     embed.add_field(name="Keep going!", value="Each message brings you closer to the next level.", inline=False)
-    await ctx.send(embed=embed)
+    await message.channel.send(embed=embed)
+
 
 
 # Function to add XP and check for level-ups
@@ -693,16 +690,14 @@ async def on_message(message):
             await message.channel.send(f'```\n{message.author.name} has been banned for an inappropriate word.```')
             return  # Stop further processing if banned
 
-    # Add XP and check for level-up
+  # Add XP and check for level-up
     user_id = str(message.author.id)
     leveled_up = add_xp(user_id)  # This will set leveled_up to True if they leveled up
 
     # Announce level-up if applicable
     if leveled_up:
-        await level_up_announcement(message.channel, xp_data[user_id]["level"], xp_data[user_id]["prestige"])
-
-    # Process any other bot commands in the message
-    await bot.process_commands(message)
+        # Pass the full `message` object to `level_up_announcement`
+        await level_up_announcement(message, xp_data[user_id]["level"], xp_data[user_id]["prestige"])
 
 bot.remove_command('help')
 
