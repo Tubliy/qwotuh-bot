@@ -644,16 +644,17 @@ async def on_message(message):
         if re.search(rf'\b{re.escape(word)}\b', message.content, re.IGNORECASE):
             await message.author.ban(reason=f'Used banned word: {word}')
             await message.channel.send(f'```\n{message.author.name} has been banned for an inappropriate word.```')
-            return  # Return here to stop further processing for this message if banned
-    
-        if message.author.bot:
-            return
+            return  # Stop further processing if banned
 
-            user_id = str(message.author.id)
-            leveled_up = add_xp(user_id)
-        if leveled_up:
-            await level_up_announcement(message.channel, xp_data[user_id]["level"], xp_data[user_id]["prestige"])
+    # Add XP and check for level-up
+    user_id = str(message.author.id)
+    leveled_up = add_xp(user_id)  # This will set leveled_up to True if they leveled up
 
+    # Announce level-up if applicable
+    if leveled_up:
+        await level_up_announcement(message.channel, xp_data[user_id]["level"], xp_data[user_id]["prestige"])
+
+    # Process any other bot commands in the message
     await bot.process_commands(message)
 
 bot.remove_command('help')
@@ -671,7 +672,7 @@ async def help(ctx):
     embed.add_field(name="!roll", value="Rolls a dice (#d#) Example: 2d6", inline=False)
     embed.add_field(name="!rps", value="Allows you to play rock paper scissors.", inline=False)
     embed.add_field(name="!coinflip", value="Allows you to flip a coin.", inline=False)
-
+    embed.add_field(name="!rank", value="Allows you to check your rank.", inline=False)
     # Add more commands as needed
     
     # Send the embed with help information
