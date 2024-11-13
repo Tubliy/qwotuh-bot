@@ -106,19 +106,6 @@ def add_xp(user_id):
 
     return False  # No level-up
 
-# Listen for messages to give XP
-@bot.event
-async def on_message(message):
-    if message.author.bot:
-        return
-
-    user_id = str(message.author.id)
-    leveled_up = add_xp(user_id)
-    if leveled_up:
-        await level_up_announcement(message.channel, xp_data[user_id]["level"], xp_data[user_id]["prestige"])
-
-    await bot.process_commands(message)
-
 # Command to check user's level, prestige, and XP bar
 @bot.command()
 async def rank(ctx):
@@ -658,17 +645,14 @@ async def on_message(message):
             await message.author.ban(reason=f'Used banned word: {word}')
             await message.channel.send(f'```\n{message.author.name} has been banned for an inappropriate word.```')
             return  # Return here to stop further processing for this message if banned
-
-    # Make sure to process other bot commands
-    await bot.process_commands(message)
     
-    if message.author.bot:
-        return
+        if message.author.bot:
+            return
 
-    user_id = str(message.author.id)
-    leveled_up = add_xp(user_id)
-    if leveled_up:
-        await level_up_announcement(message.channel, xp_data[user_id]["level"], xp_data[user_id]["prestige"])
+            user_id = str(message.author.id)
+            leveled_up = add_xp(user_id)
+         if leveled_up:
+            await level_up_announcement(message.channel, xp_data[user_id]["level"], xp_data[user_id]["prestige"])
 
     await bot.process_commands(message)
 
