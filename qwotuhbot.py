@@ -23,7 +23,31 @@ import math
 import json
 
 logging.basicConfig(level=logging.INFO, filename='/home/tubliy/qwotuh-bot/bot.log')
+# Define intents
+intents = discord.Intents.default()
+intents.message_content = True  # Enable the message content intent
+intents.members = True
 
+# Set up the bot with the defined intents
+bot = commands.Bot(command_prefix='!', intents=intents)
+
+ROLE_IDS = {
+  "Notifications" : 1300696449687748700
+}
+
+# List of banned words
+banned_words = ["nigger", "kkk", "faggot", "coon", "chink"]
+warnings = {}
+ANNOUNCEMENT_CHANNEL_ID = 1262467818171928789
+TIKTOK_URL = 'https://www.tiktok.com/@qwotuh'
+TWITCH_URL = 'https://www.twitch.com/qwotuh'
+was_live_tiktok = False
+was_live_twitch = False
+executor = ThreadPoolExecutor(max_workers=2)
+USERNAME = 'qwotuh'
+
+COUNT_CHANNEL_ID = 1305085207917105172
+ROLE_TO_TRACK = "Viewers"
 try:
     with open("xp_data.json", "r") as f:
         xp_data = json.load(f)
@@ -107,7 +131,7 @@ def add_xp(user_id):
     return False  # No level-up
 
 # Command to check user's level, prestige, and XP bar
-@bot.command()
+    @bot.command()
 async def rank(ctx, member: discord.Member = None):
     # Use the mentioned member or the command author as the target
     target = member or ctx.author
@@ -133,33 +157,6 @@ async def rank(ctx, member: discord.Member = None):
         await ctx.send(embed=embed)
     else:
         await ctx.send(f"{target.display_name} has no levels yet. Start chatting to gain XP!")
-
-  
-# Define intents
-intents = discord.Intents.default()
-intents.message_content = True  # Enable the message content intent
-intents.members = True
-
-# Set up the bot with the defined intents
-bot = commands.Bot(command_prefix='!', intents=intents)
-
-ROLE_IDS = {
-  "Notifications" : 1300696449687748700
-}
-
-# List of banned words
-banned_words = ["nigger", "kkk", "faggot", "coon", "chink"]
-warnings = {}
-ANNOUNCEMENT_CHANNEL_ID = 1262467818171928789
-TIKTOK_URL = 'https://www.tiktok.com/@qwotuh'
-TWITCH_URL = 'https://www.twitch.com/qwotuh'
-was_live_tiktok = False
-was_live_twitch = False
-executor = ThreadPoolExecutor(max_workers=2)
-USERNAME = 'qwotuh'
-
-COUNT_CHANNEL_ID = 1305085207917105172
-ROLE_TO_TRACK = "Viewers"
 
 @tasks.loop(minutes=5)
 async def update_count():
