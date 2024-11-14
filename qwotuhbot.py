@@ -342,15 +342,6 @@ async def poll(ctx, *, question):
     await message.add_reaction("👍")
     await message.add_reaction("👎")
 
-import os
-import logging
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, WebDriverException
 
 def check_tiktok_live(username):
     """Check if the TikTok user is live by looking for the live badge."""
@@ -388,8 +379,7 @@ def check_tiktok_live(username):
         # Wait for the live badge element to load
         try:
             live_badge = WebDriverWait(driver, 30).until(
-                EC.presence_of_element_located((By.CLASS_NAME, ".css-1n3ab5j-SpanLiveBadge.e1vl87hj3"))
-            )
+              EC.presence_of_element_located((By.XPATH, "//*[contains(@class, 'css-1n3ab5j-SpanLiveBadge')]"))
             logging.info("Live badge found.")
             print("[INFO] Live badge found.")
             return True  # User is live
