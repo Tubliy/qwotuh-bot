@@ -87,11 +87,17 @@ def xp_bar(current_xp, level_up_xp, bar_length=20):
     bar = "█" * filled_length + "-" * (bar_length - filled_length)
     return f"[{bar}] {int(progress * 100)}%"
 
+# List of user IDs or usernames to exclude from the leaderboard
+excluded_users = ["tubliy", "qwotuhh"]
+
 @bot.command()
 async def leaderboard(ctx):
-    # Sort the users by level (and by XP as a secondary sort) in descending order
+    # Filter out excluded users by checking their usernames
+    filtered_users = {user_id: data for user_id, data in xp_data.items() if str(user_id) not in excluded_users}
+    
+    # Sort the filtered users by level (and by XP as a secondary sort) in descending order
     sorted_users = sorted(
-        xp_data.items(),
+        filtered_users.items(),
         key=lambda item: (item[1]["level"], item[1]["xp"]),
         reverse=True
     )
@@ -382,7 +388,7 @@ def check_tiktok_live(username):
         # Wait for the live badge element to load
         try:
             live_badge = WebDriverWait(driver, 30).until(
-                EC.presence_of_element_located((By.CLASS_NAME, "css-1n3ab5j-SpanLiveBadge"))
+                EC.presence_of_element_located((By.CLASS_NAME, ".css-1n3ab5j-SpanLiveBadge.e1vl87hj3"))
             )
             logging.info("Live badge found.")
             print("[INFO] Live badge found.")
