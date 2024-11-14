@@ -87,6 +87,34 @@ def xp_bar(current_xp, level_up_xp, bar_length=20):
     bar = "█" * filled_length + "-" * (bar_length - filled_length)
     return f"[{bar}] {int(progress * 100)}%"
 
+@bot.command()
+async def leaderboard(ctx):
+    # Sort the users by level (and by XP as a secondary sort) in descending order
+    sorted_users = sorted(
+        xp_data.items(),
+        key=lambda item: (item[1]["level"], item[1]["xp"]),
+        reverse=True
+    )
+
+    # Create the leaderboard embed
+    embed = discord.Embed(title="🏆 Leaderboard 🏆", color=discord.Color.gold())
+    embed.set_footer(text="Top players based on level and XP")
+
+    # Limit to top 10 users and format each entry
+    for idx, (user_id, data) in enumerate(sorted_users[:10], start=1):
+        user = await bot.fetch_user(user_id)  # Fetch the user by ID
+        level = data["level"]
+        xp = data["xp"]
+        prestige = data["prestige"]
+        embed.add_field(
+            name=f"{idx}. {user.display_name}",
+            value=f"Level: {level} | XP: {xp} | Prestige: {prestige}",
+            inline=False
+        )
+
+    # Send the leaderboard
+    await ctx.send(embed=embed)
+
 async def level_up_announcement(message, level, prestige):
     # Only congratulate on multiples of 10
     if level % 10 != 0:
