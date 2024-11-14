@@ -88,12 +88,15 @@ def xp_bar(current_xp, level_up_xp, bar_length=20):
     return f"[{bar}] {int(progress * 100)}%"
 
 # List of user IDs or usernames to exclude from the leaderboard
-excluded_users = ["tubliy", "qwotuhh"]
+# Replace these with your actual Discord user IDs
+excluded_user_ids = ["400402306836856833", "795417945105891352"]
 
 @bot.command()
 async def leaderboard(ctx):
-    # Filter out excluded users by checking their usernames
-    filtered_users = {user_id: data for user_id, data in xp_data.items() if str(user_id) not in excluded_users}
+    # Filter out excluded users by checking their IDs
+    filtered_users = {
+        user_id: data for user_id, data in xp_data.items() if user_id not in excluded_user_ids
+    }
     
     # Sort the filtered users by level (and by XP as a secondary sort) in descending order
     sorted_users = sorted(
@@ -108,7 +111,7 @@ async def leaderboard(ctx):
 
     # Limit to top 10 users and format each entry
     for idx, (user_id, data) in enumerate(sorted_users[:10], start=1):
-        user = await bot.fetch_user(user_id)  # Fetch the user by ID
+        user = await bot.fetch_user(int(user_id))  # Fetch the user by ID
         level = data["level"]
         xp = data["xp"]
         prestige = data["prestige"]
@@ -120,6 +123,7 @@ async def leaderboard(ctx):
 
     # Send the leaderboard
     await ctx.send(embed=embed)
+
 
 async def level_up_announcement(message, level, prestige):
     # Only congratulate on multiples of 10
@@ -379,7 +383,7 @@ def check_tiktok_live(username):
         # Wait for the live badge element to load
         try:
             live_badge = WebDriverWait(driver, 30).until(
-              EC.presence_of_element_located((By.XPATH, "//*[contains(@class, 'css-1n3ab5j-SpanLiveBadge')]"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, ".css-1n3ab5j-SpanLiveBadge"))
             )
             logging.info("Live badge found.")
             print("[INFO] Live badge found.")
