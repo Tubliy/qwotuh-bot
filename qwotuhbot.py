@@ -380,6 +380,7 @@ def check_tiktok_live(username):
         try:
             live_badge = WebDriverWait(driver, 30).until(
               EC.presence_of_element_located((By.XPATH, "//*[contains(@class, 'css-1n3ab5j-SpanLiveBadge')]"))
+            )
             logging.info("Live badge found.")
             print("[INFO] Live badge found.")
             return True  # User is live
