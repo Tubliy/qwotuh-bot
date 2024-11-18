@@ -156,33 +156,39 @@ async def level_up_announcement(message, level, prestige):
 
 
 # Function to add XP and check for level-ups
+import json
+
 def add_xp(user_id):
     if user_id not in xp_data:
         xp_data[user_id] = {"xp": 0, "level": 1, "prestige": 0}
 
     xp_data[user_id]["xp"] += 10  # Adjust XP gain per message
 
-    # Progressive XP required for each level
-    level_up_xp = 100 * (1.5 ** (xp_data[user_id]["level"] - 1))
-    
-    # Check for level-up
-    if xp_data[user_id]["xp"] >= level_up_xp:
-        xp_data[user_id]["xp"] = 0
-        xp_data[user_id]["level"] += 1
-        
-        # Check for prestige
-        if xp_data[user_id]["level"] > 55:
-            xp_data[user_id]["level"] = 1
-            if xp_data[user_id]["prestige"] < 10:
-                xp_data[user_id]["prestige"] += 1
+    level_up = False  # Flag to track level-up
+    while True:
+        # Progressive XP required for each level
+        level_up_xp = 100 * (1.5 ** (xp_data[user_id]["level"] - 1))
 
-        return True  # Indicates a level-up occurred
+        # Check for level-up
+        if xp_data[user_id]["xp"] >= level_up_xp:
+            xp_data[user_id]["xp"] -= level_up_xp  # Carry over excess XP
+            xp_data[user_id]["level"] += 1
+            level_up = True
+
+            # Check for prestige
+            if xp_data[user_id]["level"] > 55:
+                xp_data[user_id]["level"] = 1
+                if xp_data[user_id]["prestige"] < 10:
+                    xp_data[user_id]["prestige"] += 1
+        else:
+            break
 
     # Save updated XP data
     with open("xp_data.json", "w") as f:
         json.dump(xp_data, f)
 
-    return False  # No level-up
+    return level_up  # Indicates whether a level-up occurred
+
 
 @bot.command()
 async def rank(ctx, member: discord.Member = None):
