@@ -312,14 +312,14 @@ async def update_count():
 
 @bot.event
 async def on_member_join(member):
-    # Define the role by its name
-
-    channel = discord.utils.get(member.guild.text_channels , name= "welcome")
+    # Define the welcome channel
+    channel = discord.utils.get(member.guild.text_channels, name="welcome")
 
     if not channel:
+        print("Welcome channel not found!")
         return
 
-    # Custom picture URL (replace this with your Discord image link)
+    # Custom picture URL
     custom_image_url = "https://cdn.discordapp.com/attachments/1297471194861273150/1308363082728472576/qwotuh.png"
 
     # Create the embed
@@ -334,16 +334,32 @@ async def on_member_join(member):
     embed.set_footer(text=f"Welcome to {member.guild.name}!")
 
     # Send the embed in the welcome channel
-    await channel.send(embed=embed)
-   
-    role = discord.utils.get(member.guild.roles, name="Viewers")
+    try:
+        await channel.send(embed=embed)
+    except discord.Forbidden:
+        print("Bot does not have permission to send messages in the welcome channel.")
 
-    # Add the role to the new member
+    # Assign the default role
+    role = discord.utils.get(member.guild.roles, name="Viewers")
     if role:
-        await member.add_roles(role)
-        print(f'Assigned {role.name} to {member.name}')
+        try:
+            await member.add_roles(role)
+            print(f'Assigned {role.name} to {member.name}')
+        except discord.Forbidden:
+            print("Bot does not have permission to manage roles.")
+        except Exception as e:
+            print(f"Error assigning role: {e}")
     else:
-        print("Role not found!")
+        print("Role 'Viewers' not found!")
+
+    # Optional: Send a private DM to the new member
+    try:
+        await member.send(
+            f"Welcome to **{member.guild.name}**, {member.mention}! 🎉\n\n"
+            "We're thrilled to have you here! Make sure to check out the rules and introduce yourself."
+        )
+    except discord.Forbidden:
+        print(f"Could not send a DM to {member.name}.")
 
 @bot.command()
 async def socials(ctx):
@@ -778,10 +794,6 @@ async def queue(ctx):
     else:
         await ctx.send("The queue is currently empty.")
 
-
-import requests
-
-import requests
 
 @bot.command()
 async def meme(ctx):
