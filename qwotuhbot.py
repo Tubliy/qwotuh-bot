@@ -358,7 +358,7 @@ async def eightball(ctx, *, question):
         "Definitely!", "I don't think so.", 
         "Absolutely not!", "It is certain."
     ]
-    await ctx.send(f"🎱 {random.choice(responses)}")
+    await ctx.send(f"🎱  {random.choice(responses)}")
 
     
 @bot.command()
