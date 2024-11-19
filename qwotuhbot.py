@@ -351,6 +351,14 @@ async def socials(ctx):
     # Send the embed
     await ctx.send(embed=embed)
 
+@bot.command()
+async def eightball(ctx, *, question):
+    responses = [
+        "Yes.", "No.", "Maybe.", "Ask again later.", 
+        "Definitely!", "I don't think so.", 
+        "Absolutely not!", "It is certain."
+    ]
+    await ctx.send(f"🎱 {random.choice(responses)}")
 
     
 @bot.command()
