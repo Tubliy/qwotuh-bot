@@ -313,6 +313,29 @@ async def update_count():
 @bot.event
 async def on_member_join(member):
     # Define the role by its name
+
+    channel = discord.utils.get(member.guild.text_channels , name= "welcome")
+
+    if not channel:
+        return
+
+    # Custom picture URL (replace this with your Discord image link)
+    custom_image_url = "https://cdn.discordapp.com/attachments/1297471194861273150/1308363082728472576/qwotuh.png"
+
+    # Create the embed
+    embed = discord.Embed(
+        title="🎉 Welcome to the Server! 🎉",
+        description=f"Hello {member.mention}, we're so glad to have you here! 🌟",
+        color=discord.Color.green()
+    )
+    embed.add_field(name="What to do next?", value="Check out the rules and introduce yourself!", inline=False)
+    embed.set_thumbnail(url=member.avatar.url)  # Use the new member's avatar
+    embed.set_image(url=custom_image_url)  # Custom image for the embed
+    embed.set_footer(text=f"Welcome to {member.guild.name}!")
+
+    # Send the embed in the welcome channel
+    await channel.send(embed=embed)
+   
     role = discord.utils.get(member.guild.roles, name="Viewers")
 
     # Add the role to the new member
@@ -784,11 +807,22 @@ async def meme(ctx):
 
 
 @bot.command()
-async def avatar(ctx, member: discord.Member = None):
-    member = member or ctx.author  # Default to the command sender
-    embed = discord.Embed(title=f"{member.name}'s Avatar", color=discord.Color.blue())
-    embed.set_image(url=member.avatar.url)
+async def userinfo(ctx, member: discord.Member = None):
+    member = member or ctx.author
+    embed = discord.Embed(title=f"User Info: {member}", color=discord.Color.blue())
+    embed.add_field(name="ID", value=member.id, inline=False)
+    embed.add_field(name="Display Name", value=member.display_name, inline=False)
+    embed.add_field(name="Joined Server", value=member.joined_at.strftime('%Y-%m-%d %H:%M:%S'), inline=False)
+    embed.set_thumbnail(url=member.avatar.url)
     await ctx.send(embed=embed)
+
+
+@bot.command()
+async def remindme(ctx, time: int, *, reminder: str):
+    await ctx.send(f"⏰ Reminder set for {time} seconds!")
+    await asyncio.sleep(time)
+    await ctx.send(f"🔔 {ctx.author.mention}, here's your reminder: **{reminder}**")
+
 
 @bot.command()
 async def hug(ctx, member: discord.Member):
