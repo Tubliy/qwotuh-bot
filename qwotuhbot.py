@@ -758,17 +758,68 @@ async def queue(ctx):
 
 import requests
 
+import requests
+
 @bot.command()
 async def meme(ctx):
-    response = requests.get("https://some-random-api.ml/meme")
+    # Fetch a random meme from the Meme API
+    response = requests.get("https://meme-api.com/gimme")
     if response.status_code == 200:
         meme_data = response.json()
-        embed = discord.Embed(title=meme_data["caption"], color=discord.Color.blue())
-        embed.set_image(url=meme_data["image"])
+        title = meme_data["title"]
+        url = meme_data["url"]
+        post_link = meme_data["postLink"]
+        subreddit = meme_data["subreddit"]
+
+        # Create an embed for the meme
+        embed = discord.Embed(title=title, url=post_link, color=discord.Color.random())
+        embed.set_image(url=url)
+        embed.set_footer(text=f"From r/{subreddit}")
+
+        # Send the meme embed
         await ctx.send(embed=embed)
     else:
-        await ctx.send("❌ Couldn't fetch a meme right now. Try again later!")
+        # Handle API errors
+        await ctx.send("❌ Couldn't fetch a meme. Try again later!")
 
+
+@bot.command()
+async def avatar(ctx, member: discord.Member = None):
+    member = member or ctx.author  # Default to the command sender
+    embed = discord.Embed(title=f"{member.name}'s Avatar", color=discord.Color.blue())
+    embed.set_image(url=member.avatar.url)
+    await ctx.send(embed=embed)
+
+@bot.command()
+async def hug(ctx, member: discord.Member):
+    # List of hug GIFs
+    hug_gifs = [
+    "https://media.giphy.com/media/l2QDM9Jnim1YVILXa/giphy.gif",
+    "https://media.giphy.com/media/od5H3PmEG5EVq/giphy.gif",
+    "https://media.giphy.com/media/3bqtLDeiDtwhq/giphy.gif",
+    "https://media.giphy.com/media/xT39D7ubkIUIrgX5XO/giphy.gif",
+    "https://media.giphy.com/media/sUIZWMnfd4Mb6/giphy.gif",
+    "https://media.giphy.com/media/2GnS81AihShS8/giphy.gif",
+    "https://media.giphy.com/media/wnsgren9NtITS/giphy.gif",
+    "https://media.giphy.com/media/BXrwTdoho6hkQ/giphy.gif",
+    "https://media.giphy.com/media/49mdjsMrH7oze/giphy.gif",
+    "https://media.giphy.com/media/yziFo5qYAOgY8/giphy.gif"
+    ]   
+
+
+    # Pick a random GIF
+    selected_gif = random.choice(hug_gifs)
+
+    # Create an embed with the GIF
+    embed = discord.Embed(
+        title="A warm hug! 🤗",
+        description=f"{ctx.author.mention} gives a big hug to {member.mention}!",
+        color=discord.Color.purple()
+    )
+    embed.set_image(url=selected_gif)
+
+    # Send the embed
+    await ctx.send(embed=embed)
 
     
 @bot.event
