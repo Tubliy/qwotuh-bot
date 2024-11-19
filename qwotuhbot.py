@@ -899,7 +899,6 @@ async def on_message(message):
 
 bot.remove_command('help')
 
-
 class HelpView(discord.ui.View):
     def __init__(self, bot, ctx, pages):
         super().__init__(timeout=60)
@@ -910,17 +909,17 @@ class HelpView(discord.ui.View):
         self.message = None
 
     async def update_embed(self):
-        """Update the embed message."""
+        """Update the embed message and button states."""
         embed = self.pages[self.current_page]
-        await self.message.edit(embed=embed)
+        # Update button states
+        self.children[0].disabled = self.current_page == 0  # Disable Previous on the first page
+        self.children[1].disabled = self.current_page == len(self.pages) - 1  # Disable Next on the last page
+        await self.message.edit(embed=embed, view=self)
 
     @discord.ui.button(label="Previous", style=discord.ButtonStyle.primary, disabled=True)
     async def previous_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         """Go to the previous page."""
         self.current_page -= 1
-        if self.current_page == 0:
-            button.disabled = True
-        self.children[1].disabled = False  # Enable the Next button
         await self.update_embed()
         await interaction.response.defer()
 
@@ -928,9 +927,6 @@ class HelpView(discord.ui.View):
     async def next_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         """Go to the next page."""
         self.current_page += 1
-        if self.current_page == len(self.pages) - 1:
-            button.disabled = True
-        self.children[0].disabled = False  # Enable the Previous button
         await self.update_embed()
         await interaction.response.defer()
 
