@@ -243,7 +243,7 @@ async def setlevel(ctx, member: discord.Member, level: int):
     
     # Calculate prestige and level within that prestige
     max_level = 55
-    prestige = min(level // max_level, 10)  # Cap at 10 for Master Prestige
+    prestige = min(level // max_level, 10)  # Cap prestige at 10 for Master Prestige
     adjusted_level = level % max_level if prestige < 10 else max_level  # Keep level within 1-55 for non-master prestige
     
     # Ensure xp_data is initialized for the user
@@ -253,18 +253,26 @@ async def setlevel(ctx, member: discord.Member, level: int):
     # Set the level and prestige
     xp_data[user_id]["level"] = adjusted_level
     xp_data[user_id]["prestige"] = prestige
+
+    # Save updated data with error handling
+    try:
+        with open("xp_data.json", "w") as f:
+            json.dump(xp_data, f)
+    except Exception as e:
+        await ctx.send(f"Failed to save data: {e}")
+        return
     
-    # Save updated data
-    with open("xp_data.json", "w") as f:
-        json.dump(xp_data, f)
+    # Determine the appropriate prestige role
+    if prestige == 10 and adjusted_level == max_level:  # Only assign Master Prestige at Level 55, Prestige 10
+        prestige_name = "Master Prestige"
+    else:
+        prestige_name = prestige_ranks.get(prestige, f"Prestige {prestige}")
     
-    # Assign the appropriate prestige role
-    prestige_name = prestige_ranks.get(prestige, "Master Prestige")
     role = discord.utils.get(ctx.guild.roles, name=prestige_name)
     if role:
-        # Remove any existing prestige roles
-        for prestige_role in prestige_ranks.values():
-            existing_role = discord.utils.get(ctx.guild.roles, name=prestige_role)
+        # Remove existing prestige roles explicitly
+        for prestige_role_name in prestige_ranks.values():
+            existing_role = discord.utils.get(ctx.guild.roles, name=prestige_role_name)
             if existing_role and existing_role in member.roles:
                 await member.remove_roles(existing_role)
         
@@ -272,7 +280,10 @@ async def setlevel(ctx, member: discord.Member, level: int):
         await member.add_roles(role)
         await ctx.send(f"{member.mention}'s level has been set to {adjusted_level} with prestige rank: {prestige_name}. Role has been updated.")
     else:
-        await ctx.send(f"{prestige_name} role does not exist on this server. Please create it to assign roles properly.")
+        await ctx.send(f"The role '{prestige_name}' does not exist on this server. Please create it to assign roles properly.")
+
+    # Announce the new level and rank
+    await ctx.send(f"{member.mention}'s level is now set to **{adjusted_level}** and prestige to **{prestige}**.")
 
 
 @tasks.loop(minutes=5)
@@ -778,6 +789,7 @@ async def help(ctx):
     embed.add_field(name="!rps", value="Allows you to play rock paper scissors.", inline=False)
     embed.add_field(name="!coinflip", value="Allows you to flip a coin.", inline=False)
     embed.add_field(name="!rank", value="Allows you to check your rank.", inline=False)
+    embed.add_field(name="!leaderboard", value= "Check the ranking leaderboard", inline=False)
     # Add more commands as needed
     
     # Send the embed with help information
