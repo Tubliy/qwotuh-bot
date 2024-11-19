@@ -265,8 +265,10 @@ async def setlevel(ctx, member: discord.Member, level: int):
     # Determine the appropriate prestige role
     if prestige == 10 and adjusted_level == max_level:  # Only assign Master Prestige at Level 55, Prestige 10
         prestige_name = "Master Prestige"
-    else:
+    elif prestige > 0:
         prestige_name = prestige_ranks.get(prestige, f"Prestige {prestige}")
+    else:
+       prestige_name = None
     
     role = discord.utils.get(ctx.guild.roles, name=prestige_name)
     if role:
