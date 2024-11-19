@@ -756,6 +756,18 @@ async def queue(ctx):
         await ctx.send("The queue is currently empty.")
 
 
+import requests
+
+@bot.command()
+async def meme(ctx):
+    response = requests.get("https://some-random-api.ml/meme")
+    if response.status_code == 200:
+        meme_data = response.json()
+        embed = discord.Embed(title=meme_data["caption"], color=discord.Color.blue())
+        embed.set_image(url=meme_data["image"])
+        await ctx.send(embed=embed)
+    else:
+        await ctx.send("❌ Couldn't fetch a meme right now. Try again later!")
 
 
     
