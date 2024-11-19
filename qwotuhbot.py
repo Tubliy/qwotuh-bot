@@ -126,37 +126,45 @@ async def leaderboard(ctx):
 
 
 async def level_up_announcement(message, level, prestige):
-    # Only congratulate on multiples of 10
-    if level % 10 != 0:
-        return  # Exit the function if the level isn't a multiple of 10
 
     guild = message.guild  # The Discord server (guild) where the bot is active
 
     # Determine the prestige rank and role name
-    prestige_rank_name = prestige_ranks.get(prestige, "Master Prestige")
-    role = discord.utils.get(guild.roles, name=prestige_rank_name)
-    
+    if prestige == 10 and level == 1:  # Master Prestige at Prestige 10, Level 1
+        prestige_rank_name = "Master Prestige"
+    elif level == 55 and prestige < 10:  # Reaching level 55 before max prestige
+        prestige_rank_name = f"Prestige {prestige + 1}"  # Next prestige rank
+    else:
+        prestige_rank_name = prestige_ranks.get(prestige, f"Prestige {prestige}")
+
     # Assign the role if it exists and hasn't already been assigned
+    role = discord.utils.get(guild.roles, name=prestige_rank_name)
     if role and role not in message.author.roles:
         await message.author.add_roles(role)
         await message.channel.send(f"{message.author.mention} has been granted the **{prestige_rank_name}** rank!")
 
-    # Send the level-up announcement
+    # Build the level-up announcement embed
     embed = discord.Embed(
         title="🎉 Level Up! 🎉",
         description=f"Congratulations {message.author.mention}, you've reached **Level {level}**!",
         color=discord.Color.gold()
     )
-    if prestige > 0:
+    
+    if prestige > 0:  # Add prestige information if applicable
         embed.set_footer(text=f"Prestige Rank: {prestige_rank_name}")
-    embed.set_thumbnail(url=message.author.avatar.url)
-    embed.add_field(name="Keep going!", value="Each message brings you closer to the next level.", inline=False)
+    
+    embed.set_thumbnail(url=message.author.avatar.url)  # Display the user's avatar
+    embed.add_field(
+        name="Keep going!", 
+        value="Each message brings you closer to the next level.", 
+        inline=False
+    )
+    
+    # Send the announcement to the channel
     await message.channel.send(embed=embed)
 
 
 
-# Function to add XP and check for level-ups
-import json
 
 def add_xp(user_id):
     if user_id not in xp_data:
