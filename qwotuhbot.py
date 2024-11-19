@@ -322,6 +322,9 @@ async def on_member_join(member):
     # Custom picture URL
     custom_image_url = "https://cdn.discordapp.com/attachments/1297471194861273150/1308363082728472576/qwotuh.png"
 
+    # Determine the avatar to use (custom or default)
+    avatar_url = member.avatar.url if member.avatar else member.default_avatar.url
+
     # Create the embed
     embed = discord.Embed(
         title="🎉 Welcome to the Server! 🎉",
@@ -329,7 +332,7 @@ async def on_member_join(member):
         color=discord.Color.green()
     )
     embed.add_field(name="What to do next?", value="Check out the rules and introduce yourself!", inline=False)
-    embed.set_thumbnail(url=member.avatar.url)  # Use the new member's avatar
+    embed.set_thumbnail(url=avatar_url)  # Use the new member's avatar or default avatar
     embed.set_image(url=custom_image_url)  # Custom image for the embed
     embed.set_footer(text=f"Welcome to {member.guild.name}!")
 
