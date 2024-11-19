@@ -864,7 +864,12 @@ async def help(ctx):
     embed.add_field(name="!rps", value="Allows you to play rock paper scissors.", inline=False)
     embed.add_field(name="!coinflip", value="Allows you to flip a coin.", inline=False)
     embed.add_field(name="!rank", value="Allows you to check your rank.", inline=False)
-    embed.add_field(name="!leaderboard", value= "Check the ranking leaderboard", inline=False)
+    embed.add_field(name="!leaderboard", value= "Check the ranking leaderboard.", inline=False)
+    embed.add_field(name="!hug", value= "Give someone a hug.", inline=False)
+    embed.add_field(name="!meme", value= "Display a random meme.", inline=False)
+
+
+
     # Add more commands as needed
     
     # Send the embed with help information
