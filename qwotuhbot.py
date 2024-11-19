@@ -282,7 +282,7 @@ async def setlevel(ctx, member: discord.Member, level: int):
         await member.add_roles(role)
         await ctx.send(f"{member.mention}'s level has been set to {adjusted_level} with prestige rank: {prestige_name}. Role has been updated.")
     elif prestige_name == None:
-        return
+        await ctx.send(f"{member.mention}'s level has been set to {adjusted_level} with prestige rank: {prestige_name}. Role has been updated.")
     else:
         await ctx.send(f"The role '{prestige_name}' does not exist on this server. Please create it to assign roles properly.")
 
