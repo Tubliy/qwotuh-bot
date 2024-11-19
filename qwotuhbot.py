@@ -899,30 +899,86 @@ async def on_message(message):
 
 bot.remove_command('help')
 
-# Command to display custom help information
+
+class HelpView(discord.ui.View):
+    def __init__(self, bot, ctx, pages):
+        super().__init__(timeout=60)
+        self.bot = bot
+        self.ctx = ctx
+        self.pages = pages
+        self.current_page = 0
+        self.message = None
+
+    async def update_embed(self):
+        """Update the embed message."""
+        embed = self.pages[self.current_page]
+        await self.message.edit(embed=embed)
+
+    @discord.ui.button(label="Previous", style=discord.ButtonStyle.primary, disabled=True)
+    async def previous_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """Go to the previous page."""
+        self.current_page -= 1
+        if self.current_page == 0:
+            button.disabled = True
+        self.children[1].disabled = False  # Enable the Next button
+        await self.update_embed()
+        await interaction.response.defer()
+
+    @discord.ui.button(label="Next", style=discord.ButtonStyle.primary)
+    async def next_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """Go to the next page."""
+        self.current_page += 1
+        if self.current_page == len(self.pages) - 1:
+            button.disabled = True
+        self.children[0].disabled = False  # Enable the Previous button
+        await self.update_embed()
+        await interaction.response.defer()
+
+    async def start(self):
+        """Send the initial help message."""
+        embed = self.pages[self.current_page]
+        self.message = await self.ctx.send(embed=embed, view=self)
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        """Ensure only the command user can interact with the buttons."""
+        if interaction.user != self.ctx.author:
+            await interaction.response.send_message("This help menu isn't for you!", ephemeral=True)
+            return False
+        return True
+
 @bot.command()
 async def help(ctx):
-    embed = discord.Embed(title="Help", description="Here are the available commands:", color=discord.Color.blue())
-    
-    # Add fields for each command
-    embed.add_field(name="!livetest", value="Checks if you're live on TikTok.", inline=False)
-    embed.add_field(name="!play <url>", value="Plays music from a given URL.", inline=False)
-    embed.add_field(name="!socials", value="Displays social media links.", inline=False)
-    embed.add_field(name="!ppsize", value="Displays your pp size", inline=False)
-    embed.add_field(name="!roll", value="Rolls a dice (#d#) Example: 2d6", inline=False)
-    embed.add_field(name="!rps", value="Allows you to play rock paper scissors.", inline=False)
-    embed.add_field(name="!coinflip", value="Allows you to flip a coin.", inline=False)
-    embed.add_field(name="!rank", value="Allows you to check your rank.", inline=False)
-    embed.add_field(name="!leaderboard", value= "Check the ranking leaderboard.", inline=False)
-    embed.add_field(name="!hug", value= "Give someone a hug.", inline=False)
-    embed.add_field(name="!meme", value= "Display a random meme.", inline=False)
+    """Help command with categories."""
+    pages = [
+        # Page 1: General Commands
+        discord.Embed(title="Help - General Commands", color=discord.Color.blue())
+        .add_field(name="!livetest", value="Checks if you're live on TikTok.", inline=False)
+        .add_field(name="!socials", value="Displays social media links.", inline=False)
+        .add_field(name="!rank", value="Allows you to check your rank.", inline=False)
+        .add_field(name="!leaderboard", value="Check the ranking leaderboard.", inline=False),
 
+        # Page 2: Fun Commands
+        discord.Embed(title="Help - Fun Commands", color=discord.Color.green())
+        .add_field(name="!ppsize", value="Displays your pp size.", inline=False)
+        .add_field(name="!hug", value="Give someone a hug.", inline=False)
+        .add_field(name="!meme", value="Display a random meme.", inline=False)
+        .add_field(name="!eightball", value="Test the magic 8ball.", inline=False),
 
+        # Page 3: Game Commands
+        discord.Embed(title="Help - Game Commands", color=discord.Color.purple())
+        .add_field(name="!roll", value="Rolls a dice (#d#) Example: 2d6.", inline=False)
+        .add_field(name="!rps", value="Allows you to play rock paper scissors.", inline=False)
+        .add_field(name="!coinflip", value="Allows you to flip a coin.", inline=False),
 
-    # Add more commands as needed
-    
-    # Send the embed with help information
-    await ctx.send(embed=embed)
+        # Page 4: Music Commands
+        discord.Embed(title="Help - Music Commands", color=discord.Color.orange())
+        .add_field(name="!play <url>", value="Plays music from a given URL.", inline=False),
+    ]
+
+    # Start the paginated help menu
+    view = HelpView(bot, ctx, pages)
+    await view.start()
+
 
     
 # Run the bot with your token
