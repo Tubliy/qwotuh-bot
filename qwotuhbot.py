@@ -821,6 +821,8 @@ async def meme(ctx):
         await ctx.send("❌ Couldn't fetch a meme. Try again later!")
 
 
+
+
 @bot.command()
 async def userinfo(ctx, member: discord.Member = None):
     member = member or ctx.author
@@ -870,6 +872,20 @@ async def hug(ctx, member: discord.Member):
     # Send the embed
     await ctx.send(embed=embed)
 
+@bot.command
+async def kiss(ctx, member: discord.Member):
+    kiss_gifs = [
+        "https://tenor.com/view/peach-and-goma-gif-16302490032000255283",
+    ]
+
+    selected_gif = random.choice(kiss_gifs)
+
+    embed = discord.Embed(
+        title = "A sweet kiss! 💋"
+        description= f"{ctx.author.mention} gives a big kiss to {member.mention}!"
+    )
+    embed.set_image(url=selected_gif)
+    await ctx.send(embed=embed)
     
 @bot.event
 async def on_message(message):
