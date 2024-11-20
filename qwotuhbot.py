@@ -886,6 +886,7 @@ async def kiss(ctx, member: discord.Member):
         color= discord.Color.pink()
     )
     embed.set_image(url=selected_gif)
+    
     await ctx.send(embed=embed)
     
 @bot.event
