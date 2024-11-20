@@ -833,6 +833,30 @@ async def userinfo(ctx, member: discord.Member = None):
     embed.set_thumbnail(url=member.avatar.url)
     await ctx.send(embed=embed)
 
+@bot.command(aliases=["smooch"])
+async def kiss(ctx, member: discord.Member):
+    kiss_gifs = [
+        "https://media.tenor.com/ihyhtunSNeMAAAAC/peach-goma.gif",  
+        "https://media.tenor.com/Y-T44IczUOkAAAAC/kiss-love.gif",
+        "https://media.tenor.com/DEzrnRVBLQwAAAAC/kiss.gif",
+        "https://media.tenor.com/2rSwF5F1UWgAAAAC/anime-kiss.gif",  # Another anime kiss
+        "https://media.tenor.com/8UWY5FhspkwAAAAC/kiss-cute.gif",   # Cute smooch
+        "https://media.tenor.com/MKfGsdKUA-QAAAAC/blow-kiss.gif",   # Blowing a kiss
+     "https://media.tenor.com/XfdWpijvVEAAAAAC/love-kiss.gif",   # Sweet couple kiss
+        "https://media.tenor.com/5f5JejI3tPwAAAAC/kiss-couple-love.gif", # Wholesome couple kiss
+        "https://media.tenor.com/oqt3pSnv9tAAAAAC/cat-kiss.gif",    # Adorable cat kiss
+    ]
+
+    selected_gif = random.choice(kiss_gifs)
+
+    embed = discord.Embed(
+        title = "A sweet kiss! 💋",
+        description= f"{ctx.author.mention} gives a big kiss to {member.mention}!",
+        color= discord.Color.magenta()
+    )
+    embed.set_image(url=selected_gif)
+
+    await ctx.send(embed=embed)
 
 @bot.command()
 async def remindme(ctx, time: int, *, reminder: str):
@@ -870,31 +894,6 @@ async def hug(ctx, member: discord.Member):
     embed.set_image(url=selected_gif)
 
     # Send the embed
-    await ctx.send(embed=embed)
-
-@bot.command
-async def kiss(ctx, member: discord.Member):
-    kiss_gifs = [
-        "https://media.tenor.com/ihyhtunSNeMAAAAC/peach-goma.gif",  
-        "https://media.tenor.com/Y-T44IczUOkAAAAC/kiss-love.gif",
-        "https://media.tenor.com/DEzrnRVBLQwAAAAC/kiss.gif",
-        "https://media.tenor.com/2rSwF5F1UWgAAAAC/anime-kiss.gif",  # Another anime kiss
-        "https://media.tenor.com/8UWY5FhspkwAAAAC/kiss-cute.gif",   # Cute smooch
-        "https://media.tenor.com/MKfGsdKUA-QAAAAC/blow-kiss.gif",   # Blowing a kiss
-     "https://media.tenor.com/XfdWpijvVEAAAAAC/love-kiss.gif",   # Sweet couple kiss
-        "https://media.tenor.com/5f5JejI3tPwAAAAC/kiss-couple-love.gif", # Wholesome couple kiss
-        "https://media.tenor.com/oqt3pSnv9tAAAAAC/cat-kiss.gif",    # Adorable cat kiss
-    ]
-
-    selected_gif = random.choice(kiss_gifs)
-
-    embed = discord.Embed(
-        title = "A sweet kiss! 💋",
-        description= f"{ctx.author.mention} gives a big kiss to {member.mention}!",
-        color= discord.Color.magenta()
-    )
-    embed.set_image(url=selected_gif)
-
     await ctx.send(embed=embed)
     
 @bot.event
