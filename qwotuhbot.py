@@ -872,7 +872,7 @@ async def hug(ctx, member: discord.Member):
     # Send the embed
     await ctx.send(embed=embed)
 
-@bot.command
+@bot.command(aliases=["smooch"])
 async def kiss(ctx, member: discord.Member):
     author = ctx.author.mention
     user = member.mention
