@@ -875,7 +875,15 @@ async def hug(ctx, member: discord.Member):
 @bot.command
 async def kiss(ctx, member: discord.Member):
     kiss_gifs = [
-        "https://tenor.com/view/peach-and-goma-gif-16302490032000255283",
+        "https://media.tenor.com/ihyhtunSNeMAAAAC/peach-goma.gif",  
+        "https://media.tenor.com/Y-T44IczUOkAAAAC/kiss-love.gif",
+        "https://media.tenor.com/DEzrnRVBLQwAAAAC/kiss.gif",
+        "https://media.tenor.com/2rSwF5F1UWgAAAAC/anime-kiss.gif",  # Another anime kiss
+        "https://media.tenor.com/8UWY5FhspkwAAAAC/kiss-cute.gif",   # Cute smooch
+        "https://media.tenor.com/MKfGsdKUA-QAAAAC/blow-kiss.gif",   # Blowing a kiss
+     "https://media.tenor.com/XfdWpijvVEAAAAAC/love-kiss.gif",   # Sweet couple kiss
+        "https://media.tenor.com/5f5JejI3tPwAAAAC/kiss-couple-love.gif", # Wholesome couple kiss
+        "https://media.tenor.com/oqt3pSnv9tAAAAAC/cat-kiss.gif",    # Adorable cat kiss
     ]
 
     selected_gif = random.choice(kiss_gifs)
@@ -883,10 +891,10 @@ async def kiss(ctx, member: discord.Member):
     embed = discord.Embed(
         title = "A sweet kiss! 💋",
         description= f"{ctx.author.mention} gives a big kiss to {member.mention}!",
-        color= discord.Color.pink()
+        color= discord.Color.magenta()
     )
     embed.set_image(url=selected_gif)
-    
+
     await ctx.send(embed=embed)
     
 @bot.event
