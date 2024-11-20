@@ -893,15 +893,18 @@ async def kiss(ctx, member: discord.Member):
         description=f"{author} kisses themselves!",
         color=discord.Color.magenta()
         )
+        embed.set_image(url=selected_gif)
         await ctx.send(embed=embed)
     elif author != user:
-         embed = discord.Embed(
+        embed = discord.Embed(
         title="A sweet kiss! 💋",
         description=f"{author} kisses {user}!",
         color=discord.Color.magenta()
         )
-         await ctx.send(embed=embed)
-    else:
+        embed.set_image(url=selected_gif)
+        await ctx.send(embed=embed)
+
+    elif user == None:
         await ctx.send("You need to mention a user")
 
 
