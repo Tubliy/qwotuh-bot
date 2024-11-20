@@ -842,7 +842,7 @@ async def kiss(ctx, member: discord.Member):
         "https://media.tenor.com/2rSwF5F1UWgAAAAC/anime-kiss.gif",  # Another anime kiss
         "https://media.tenor.com/8UWY5FhspkwAAAAC/kiss-cute.gif",   # Cute smooch
         "https://media.tenor.com/MKfGsdKUA-QAAAAC/blow-kiss.gif",   # Blowing a kiss
-     "https://media.tenor.com/XfdWpijvVEAAAAAC/love-kiss.gif",   # Sweet couple kiss
+        "https://media.tenor.com/XfdWpijvVEAAAAAC/love-kiss.gif",   # Sweet couple kiss
         "https://media.tenor.com/5f5JejI3tPwAAAAC/kiss-couple-love.gif", # Wholesome couple kiss
         "https://media.tenor.com/oqt3pSnv9tAAAAAC/cat-kiss.gif",    # Adorable cat kiss
     ]
@@ -854,7 +854,7 @@ async def kiss(ctx, member: discord.Member):
         description= f"{ctx.author.mention} gives a big kiss to {member.mention}!",
         color= discord.Color.magenta()
     )
-    embed.set_image(url=selected_gif)
+    embed.set_image(url= selected_gif)
 
     await ctx.send(embed=embed)
 
