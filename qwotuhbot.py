@@ -904,8 +904,9 @@ async def kiss(ctx, member: discord.Member):
         embed.set_image(url=selected_gif)
         await ctx.send(embed=embed)
 
-    elif user == None:
-        await ctx.send("You need to mention a user")
+    elif member is None:
+        await ctx.send("❌ You need to mention a user!")
+        return
 
 
     
