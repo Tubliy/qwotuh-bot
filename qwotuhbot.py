@@ -894,7 +894,7 @@ async def kiss(ctx, member: discord.Member):
         color=discord.Color.magenta()
         )
         await ctx.send(embed=embed)
-    elif not author:
+    elif author != user:
          embed = discord.Embed(
         title="A sweet kiss! 💋",
         description=f"{author} kisses {user}!",
