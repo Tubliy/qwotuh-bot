@@ -881,8 +881,9 @@ async def kiss(ctx, member: discord.Member):
     selected_gif = random.choice(kiss_gifs)
 
     embed = discord.Embed(
-        title = "A sweet kiss! 💋"
-        description= f"{ctx.author.mention} gives a big kiss to {member.mention}!"
+        title = "A sweet kiss! 💋",
+        description= f"{ctx.author.mention} gives a big kiss to {member.mention}!",
+        color= discord.Color.pink()
     )
     embed.set_image(url=selected_gif)
     await ctx.send(embed=embed)
