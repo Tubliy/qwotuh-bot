@@ -90,7 +90,6 @@ def xp_bar(current_xp, level_up_xp, bar_length=20):
 # List of user IDs or usernames to exclude from the leaderboard
 # Replace these with your actual Discord user IDs
 excluded_user_ids = ["400402306836856833", "795417945105891352"]
-
 @bot.command()
 async def leaderboard(ctx):
     # Filter out excluded users by checking their IDs
@@ -132,7 +131,7 @@ async def level_up_announcement(message, level, prestige):
     # Determine the prestige rank and role name
     if prestige == 10 and level == 1:  # Master Prestige at Prestige 10, Level 1
         prestige_rank_name = "Master Prestige"
-    elif level == 55 and prestige < 10:  # Reaching level 55 before max prestige
+    elif level == 25 and prestige < 10:  # Reaching level 25 before max prestige
         prestige_rank_name = f"Prestige {prestige + 1}"  # Next prestige rank
     else:
         prestige_rank_name = prestige_ranks.get(prestige, f"Prestige {prestige}")
@@ -184,7 +183,7 @@ def add_xp(user_id):
             level_up = True
 
             # Check for prestige
-            if xp_data[user_id]["level"] > 55:
+            if xp_data[user_id]["level"] > 25:
                 xp_data[user_id]["level"] = 1
                 if xp_data[user_id]["prestige"] < 10:
                     xp_data[user_id]["prestige"] += 1
@@ -242,9 +241,9 @@ async def setlevel(ctx, member: discord.Member, level: int):
     user_id = str(member.id)
     
     # Calculate prestige and level within that prestige
-    max_level = 55
+    max_level = 25
     prestige = min(level // max_level, 10)  # Cap prestige at 10 for Master Prestige
-    adjusted_level = level % max_level if prestige < 10 else max_level  # Keep level within 1-55 for non-master prestige
+    adjusted_level = level % max_level if prestige < 10 else max_level  # Keep level within 1-25 for non-master prestige
     
     # Ensure xp_data is initialized for the user
     if user_id not in xp_data:
@@ -263,7 +262,7 @@ async def setlevel(ctx, member: discord.Member, level: int):
         return
     
     # Determine the appropriate prestige role
-    if prestige == 10 and adjusted_level == max_level:  # Only assign Master Prestige at Level 55, Prestige 10
+    if prestige == 10 and adjusted_level == max_level:  # Only assign Master Prestige at Level 25, Prestige 10
         prestige_name = "Master Prestige"
     elif prestige > 0:
         prestige_name = prestige_ranks.get(prestige, f"Prestige {prestige}")
