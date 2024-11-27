@@ -625,28 +625,15 @@ API_KEY = "78187b8c75msh12c016a76ad49a0p1daa54jsnafc897edeec"
 BASE_URL = "https://would-you-rather.p.rapidapi.com/wyr"
 
 @bot.command()
-async def wyr(ctx):
-    try:
-        # Make a request to the API
-        headers = {
-            "X-RapidAPI-Key": API_KEY,
-            "X-RapidAPI-Host": "would-you-rather.p.rapidapi.com"
-        }
-        response = requests.get(BASE_URL, headers=headers)
-        data = response.json()
+async def dance(ctx, member: discord.Member):
+    moves = ["moonwalks gracefully 🕺", "does the worm 🪱", "breakdances like a pro 💃", "spins on their head 🤸"]
+    await ctx.send(f"{ctx.author.mention} challenges {member.mention} to a dance battle and {random.choice(moves)}!")
 
-        # Check if the API returned a question
-        if response.status_code == 200 and "data" in data:
-            question = data["data"]["question"]
 
-            # Send the question to the Discord channel
-            await ctx.send(f"❓ **Would You Rather**:\n{question}")
-        else:
-            # Handle API errors
-            await ctx.send("🚨 Sorry, I couldn't fetch a question. Please try again later.")
-    except Exception as e:
-        # Handle any exceptions during the request
-        await ctx.send(f"❌ An error occurred: {e}")
+@bot.command()
+async def reverse(ctx, *, text: str):
+    await ctx.send(f"🔄 {text[::-1]}")
+
 
 @bot.command()
 async def socials(ctx):
