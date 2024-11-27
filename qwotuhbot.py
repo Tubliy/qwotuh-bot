@@ -100,11 +100,17 @@ def xp_bar(current_xp, level_up_xp, bar_length=20):
     bar = "█" * filled_length + "-" * (bar_length - filled_length)
     return f"[{bar}] {int(progress * 100)}%"
 
-# List of user IDs or usernames to exclude from the leaderboard
-# Replace these with your actual Discord user IDs
+
+# Medal emojis or Unicode
+medals = {
+    1: "🥇",  # Gold medal
+    2: "🥈",  # Silver medal
+    3: "🥉"   # Bronze medal
+}
+
 excluded_user_ids = ["795417945105891352"]
+
 @bot.command()
-# Dictionary mapping prestige levels to custom emojis
 async def leaderboard(ctx):
     # Filter out excluded users by checking their IDs
     filtered_users = {
@@ -130,16 +136,20 @@ async def leaderboard(ctx):
         prestige = data["prestige"]
         badge = prestige_emojis.get(prestige, "")  # Get badge emoji or empty if not found
 
+        # Add medals for the top 3 users
+        medal = medals.get(idx, "")  # Get the medal for 1st, 2nd, and 3rd (empty for others)
+
         # Format the leaderboard field
         field_value = f"Level: {level} | XP: {xp} | Prestige: {prestige} {badge}"
         embed.add_field(
-            name=f"{idx}. {user.display_name}",
+            name=f"{medal} {idx}. {user.display_name}",
             value=field_value,
             inline=False
         )
 
     # Send the leaderboard
     await ctx.send(embed=embed)
+
 
 
 
