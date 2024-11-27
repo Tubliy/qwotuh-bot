@@ -90,7 +90,7 @@ def xp_bar(current_xp, level_up_xp, bar_length=20):
 # List of user IDs or usernames to exclude from the leaderboard
 # Replace these with your actual Discord user IDs
 excluded_user_ids = ["795417945105891352"]
-
+@bot.command()
 async def leaderboard(ctx):
     # Filter out excluded users by checking their IDs
     filtered_users = {
