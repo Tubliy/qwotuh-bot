@@ -101,6 +101,10 @@ def xp_bar(current_xp, level_up_xp, bar_length=20):
     return f"[{bar}] {int(progress * 100)}%"
 
 
+import os
+import json
+import discord
+
 # Medal emojis or Unicode
 medals = {
     1: "🥇",  # Gold medal
@@ -108,7 +112,8 @@ medals = {
     3: "🥉"   # Bronze medal
 }
 
-excluded_user_ids = ["400402306836856833","795417945105891352"]
+# Excluded user IDs
+excluded_user_ids = ["400402306836856833", "795417945105891352"]
 
 # Path to the file where rankings will be stored
 RANKS_FILE = "previous_ranks.json"
@@ -155,7 +160,13 @@ async def leaderboard(ctx):
     # Generate leaderboard and calculate rank changes
     new_ranks = {}  # Store the new rankings
     for idx, (user_id, data) in enumerate(sorted_users[:10], start=1):
-        user = await bot.fetch_user(int(user_id))  # Fetch the user by ID
+        try:
+            user = await bot.fetch_user(int(user_id))  # Fetch the user by ID
+        except discord.NotFound:
+            user_display_name = f"Unknown User ({user_id})"
+        else:
+            user_display_name = user.display_name
+
         level = data["level"]
         xp = data["xp"]
         prestige = data["prestige"]
@@ -179,7 +190,7 @@ async def leaderboard(ctx):
         medal = medals.get(idx, "")
 
         # Format the leaderboard field
-        field_name = f"{medal} {user.display_name} {rank_change}"
+        field_name = f"{medal} {user_display_name} {rank_change}"
         field_value = f"✨ **Level**: {level} | **XP**: {xp} | **Prestige**: {prestige} {badge}"
         embed.add_field(name=field_name, value=field_value, inline=False)
 
@@ -188,6 +199,7 @@ async def leaderboard(ctx):
 
     # Save the new rankings to the file
     save_previous_ranks(new_ranks)
+
 
 
 
