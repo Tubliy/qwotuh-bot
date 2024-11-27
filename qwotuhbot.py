@@ -110,8 +110,13 @@ medals = {
 
 excluded_user_ids = ["400402306836856833","795417945105891352"]
 
+# Example of previous rankings (you should update this after sending the leaderboard)
+previous_ranks = {}  # Store previous ranks: {user_id: previous_rank}
+
 @bot.command()
 async def leaderboard(ctx):
+    global previous_ranks  # Use global to update the rankings after sending
+
     # Filter out excluded users by checking their IDs
     filtered_users = {
         user_id: data for user_id, data in xp_data.items() if user_id not in excluded_user_ids
@@ -125,10 +130,15 @@ async def leaderboard(ctx):
     )
 
     # Create the leaderboard embed
-    embed = discord.Embed(title="🏆 Leaderboard 🏆", color=discord.Color.gold())
-    embed.set_footer(text="Top players based on level and XP")
+    embed = discord.Embed(
+        title="🏆 **Leaderboard** 🏆",
+        description="Top players based on **Level** and **XP**.\n\n",
+        color=discord.Color.gold()
+    )
+    embed.set_footer(text=f"🏅 Total Players: {len(filtered_users)} | Keep grinding! 💪")
 
-    # Limit to top 10 users and format each entry
+    # Generate leaderboard and calculate rank changes
+    new_ranks = {}  # Store the new rankings
     for idx, (user_id, data) in enumerate(sorted_users[:10], start=1):
         user = await bot.fetch_user(int(user_id))  # Fetch the user by ID
         level = data["level"]
@@ -136,20 +146,33 @@ async def leaderboard(ctx):
         prestige = data["prestige"]
         badge = prestige_emojis.get(prestige, "")  # Get badge emoji or empty if not found
 
-        # Add medals for the top 3 users
-        medal = medals.get(idx, "")  # Get the medal for 1st, 2nd, and 3rd (empty for others)
+        # Determine rank change
+        previous_rank = previous_ranks.get(user_id)
+        if previous_rank is None:
+            rank_change = "🆕"  # New player
+        elif idx < previous_rank:
+            rank_change = "🔺"  # Moved up
+        elif idx > previous_rank:
+            rank_change = "🔻"  # Moved down
+        else:
+            rank_change = "➖"  # No change
+
+        # Store the new rank
+        new_ranks[user_id] = idx
+
+        # Add medals for top 3
+        medal = medals.get(idx, "")
 
         # Format the leaderboard field
-        field_value = f"Level: {level} | XP: {xp} | Prestige: {prestige} {badge}"
-        embed.add_field(
-            name=f"{medal} {idx}. {user.display_name}",
-            value=field_value,
-            inline=False
-        )
+        field_name = f"{medal} {user.display_name} {rank_change}"
+        field_value = f"✨ **Level**: {level} | **XP**: {xp} | **Prestige**: {prestige} {badge}"
+        embed.add_field(name=field_name, value=field_value, inline=False)
 
     # Send the leaderboard
     await ctx.send(embed=embed)
 
+    # Update the previous rankings
+    previous_ranks = new_ranks
 
 
 
