@@ -390,9 +390,14 @@ async def level_up_announcement(message, level, prestige):
 def add_xp(user_id):
     """Handle XP calculations and grant food on level-up."""
     if user_id not in xp_data:
+        # Initialize user data with the `food` key
         xp_data[user_id] = {"xp": 0, "level": 1, "prestige": 0, "food": 0}
 
-    base_xp = 10
+    # Ensure the `food` key exists for existing users
+    if "food" not in xp_data[user_id]:
+        xp_data[user_id]["food"] = 0
+
+    base_xp = 20
     if double_xp_active:
         base_xp *= 2
 
@@ -415,19 +420,6 @@ def add_xp(user_id):
 
     return level_up
 
-
-async def process_xp(message):
-    """Handles XP addition and sends notifications if needed."""
-    user_id = str(message.author.id)
-    leveled_up = add_xp(user_id)
-
-    if leveled_up:
-        level = xp_data[user_id]["level"]
-        await message.channel.send(f"🎉 {message.author.mention} leveled up to **Level {level}**!")
-
-        # Notify about pet hatching eligibility
-        if level % 5 == 0:
-            await message.channel.send(f"🐣 You're now eligible to hatch a new pet! Use `!hatch` to get one.")
 
 
 @bot.command()
