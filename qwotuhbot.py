@@ -80,6 +80,19 @@ prestige_icons = {
     10: "https://cdn.discordapp.com/attachments/1306125326124060682/1306131105413333013/Master_Prestige.png"
 }
 
+prestige_emojis = {
+    0: ":badge0:",  # Replace with your custom emoji names or IDs
+    1: ":badge1:",
+    2: ":badge2:",
+    3: ":badge3:",
+    4: ":badge4:",
+    5: ":badge5:",
+    6: ":badge6:", 
+    7: ":badge7:",
+    8: ":badge8:",
+    9: ":badge9:",
+    10: ":master_prestige:"  # Example for prestige 10
+}
 # XP bar function to show progress towards the next level
 def xp_bar(current_xp, level_up_xp, bar_length=20):
     progress = min(current_xp / level_up_xp, 1)
@@ -91,6 +104,7 @@ def xp_bar(current_xp, level_up_xp, bar_length=20):
 # Replace these with your actual Discord user IDs
 excluded_user_ids = ["795417945105891352"]
 @bot.command()
+# Dictionary mapping prestige levels to custom emojis
 async def leaderboard(ctx):
     # Filter out excluded users by checking their IDs
     filtered_users = {
@@ -114,13 +128,10 @@ async def leaderboard(ctx):
         level = data["level"]
         xp = data["xp"]
         prestige = data["prestige"]
-        badge_url = prestige_icons.get(prestige, "")  # Get badge URL or empty if not found
-        
-        # Format field with text and badge
-        field_value = (
-            f"Level: {level} | XP: {xp} | Prestige: {prestige}\n"
-            f"[![Badge]({badge_url})]({badge_url})" if badge_url else ""
-        )
+        badge = prestige_emojis.get(prestige, "")  # Get badge emoji or empty if not found
+
+        # Format the leaderboard field
+        field_value = f"Level: {level} | XP: {xp} | Prestige: {prestige} {badge}"
         embed.add_field(
             name=f"{idx}. {user.display_name}",
             value=field_value,
@@ -129,6 +140,7 @@ async def leaderboard(ctx):
 
     # Send the leaderboard
     await ctx.send(embed=embed)
+
 
 
 
