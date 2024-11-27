@@ -46,6 +46,7 @@ was_live_twitch = False
 executor = ThreadPoolExecutor(max_workers=2)
 USERNAME = 'qwotuh'
 
+
 COUNT_CHANNEL_ID = 1305085207917105172
 ROLE_TO_TRACK = "Viewers"
 try:
@@ -393,13 +394,14 @@ async def socials(ctx):
     await ctx.send(embed=embed)
 
 @bot.command()
-async def eightball(ctx, *, question):
+async def eightball(ctx, *, question, user_id):
     responses = [
         "Yes.", "No.", "Maybe.", "Ask again later.", 
         "Definitely!", "I don't think so.", 
         "Absolutely not!", "It is certain."
     ]
     await ctx.send(f"🎱  {random.choice(responses)}")
+    command_xp(user_id)
 
     
 @bot.command()
@@ -677,7 +679,7 @@ async def livetest(ctx):
 
 
 @bot.command()
-async def ppsize(ctx):
+async def ppsize(ctx, user_id):
     user = ctx.author
     size = random.randint(1, 12)
     if not ctx.message.mentions:
@@ -690,12 +692,14 @@ async def ppsize(ctx):
 
     # Send the response mentioning the tagged user
     await ctx.send(f"{tagged_user.mention}'s pp size is: 8{'=' * size}D or {size} inches! 🍆")
+    command_xp(user_id)
 
 
 
 @bot.command()
-async def rps(ctx, *, message: str):
+async def rps(ctx, *, message: str, user_id):
     # Check if the input is valid
+    command_xp(user_id)
     try:
         if message.lower() not in ["rock", "paper", "scissors"]:
             raise ValueError("Invalid input")
@@ -720,9 +724,10 @@ async def rps(ctx, *, message: str):
         await ctx.send("Invalid input: Please use rock, paper, or scissors.")
         
 @bot.command()
-async def coinflip(ctx):
+async def coinflip(ctx, user_id):
     flip = random.choice(["Heads","Tails"])
     await ctx.send(flip)
+    command_xp(user_id)
     
 song_queue = []
 
@@ -798,7 +803,8 @@ async def queue(ctx):
 
 
 @bot.command()
-async def meme(ctx):
+async def meme(ctx, user_id):
+    command_xp(user_id)
     # Fetch a random meme from the Meme API
     response = requests.get("https://meme-api.com/gimme")
     if response.status_code == 200:
@@ -818,7 +824,13 @@ async def meme(ctx):
     else:
         # Handle API errors
         await ctx.send("❌ Couldn't fetch a meme. Try again later!")
+        
 
+def command_xp(user_id):
+    if user_id in xp_data:  # Ensure the user exists in xp_data
+        xp_data[user_id]["xp"] += 30
+    else:
+        print(f"User ID {user_id} does not exist!")
 
 
 
@@ -841,7 +853,7 @@ async def remindme(ctx, time: int, *, reminder: str):
 
 
 @bot.command()
-async def hug(ctx, member: discord.Member):
+async def hug(ctx, member: discord.Member, user_id):
     # List of hug GIFs
     hug_gifs = [
     "https://media.giphy.com/media/l2QDM9Jnim1YVILXa/giphy.gif",
@@ -869,13 +881,14 @@ async def hug(ctx, member: discord.Member):
     embed.set_image(url=selected_gif)
 
     # Send the embed
+    command_xp(user_id)
     await ctx.send(embed=embed)
 
 @bot.command(aliases=["smooch"])
-async def kiss(ctx, member: discord.Member):
+async def kiss(ctx, member: discord.Member, user_id):
     author = ctx.author.mention
     user = member.mention
-
+    command_xp(user_id)
     kiss_gifs = [
     "https://media.giphy.com/media/Z21HJj2kz9uBG/giphy.gif",
     "https://media.giphy.com/media/kU586ictpGb0Q/giphy.gif",
