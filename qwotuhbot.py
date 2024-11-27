@@ -35,6 +35,7 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 ROLE_IDS = {
   "Notifications" : 1300696449687748700
 }
+double_xp_active = False  # Default state
 
 # List of banned words
 banned_words = ["nigger", "kkk", "faggot", "coon", "chink"]
@@ -133,7 +134,7 @@ async def reset_gift_card(ctx):
         await ctx.send(f"🎁 Gift card code has been successfully reset by {ctx.author.mention}.")
     else:
         await ctx.send("❌ No gift card code is currently set.")
-        
+
 @bot.command()
 @commands.has_permissions(administrator=True)  # Restrict to admins
 async def set_gift_card(ctx, *, code: str):
@@ -391,7 +392,13 @@ def add_xp(user_id):
     if user_id not in xp_data:
         xp_data[user_id] = {"xp": 0, "level": 1, "prestige": 0}
 
-    xp_data[user_id]["xp"] += 10  # Adjust XP gain per message
+    # Base XP gain
+    base_xp = 20
+    if double_xp_active:  # Check if Double XP is active
+        base_xp *= 2
+
+    xp_data[user_id]["xp"] += base_xp  # Award XP
+    print(f"User {user_id} gained {base_xp} XP. (Double XP Active: {double_xp_active})")
 
     level_up = False  # Flag to track level-up
     while True:
@@ -418,6 +425,17 @@ def add_xp(user_id):
 
     return level_up  # Indicates whether a level-up occurred
 
+@bot.command()
+@commands.has_permissions(administrator=True)  # Restrict to admins
+async def double_xp(ctx):
+    global double_xp_active  # Use the global variable
+    double_xp_active = not double_xp_active  # Toggle state
+
+    if double_xp_active:
+        await ctx.send(f"✨ **Double XP** has been **activated** by {ctx.author.mention}! All XP gains are now doubled. 🚀")
+    else:
+        await ctx.send(f"✨ **Double XP** has been **deactivated** by {ctx.author.mention}. Back to normal XP. 😞")
+
 
 @bot.command()
 async def rank(ctx, member: discord.Member = None):
@@ -429,7 +447,7 @@ async def rank(ctx, member: discord.Member = None):
         level = xp_data[user_id]["level"]
         prestige = xp_data[user_id]["prestige"]
         level_up_xp = 100 * (1.5 ** (level - 1))  # Adjusted XP for the next level
-        
+
         # Determine prestige display and icon
         if prestige == 0:
             prestige_display = "Prestige 0"  # Text for non-prestiged users
@@ -452,11 +470,18 @@ async def rank(ctx, member: discord.Member = None):
         embed.add_field(name="Prestige", value=prestige_display, inline=True)
         embed.add_field(name="XP", value=f"{current_xp}/{int(level_up_xp)}", inline=True)
         embed.add_field(name="Progress", value=bar, inline=False)
+
+        # Show Double XP status
+        embed.add_field(
+            name="Double XP Status",
+            value="**Active** 🚀" if double_xp_active else "**Inactive** 😞",
+            inline=False
+        )
         
         await ctx.send(embed=embed)
     else:
         await ctx.send(f"{target.display_name} has no levels yet. Start chatting to gain XP!")
-      
+
 @bot.command()
 @commands.has_permissions(administrator=True)  # Restrict this command to administrators
 async def setlevel(ctx, member: discord.Member, level: int):
