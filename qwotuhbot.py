@@ -126,7 +126,28 @@ def save_gift_card(gift_card):
 # Command to set the gift card code
 @bot.command()
 @commands.has_permissions(administrator=True)  # Restrict to admins
+async def reset_gift_card(ctx):
+    # Check if the gift card file exists
+    if os.path.exists(GIFT_CARD_FILE):
+        os.remove(GIFT_CARD_FILE)  # Delete the file
+        await ctx.send(f"🎁 Gift card code has been successfully reset by {ctx.author.mention}.")
+    else:
+        await ctx.send("❌ No gift card code is currently set.")
+        
+@bot.command()
+@commands.has_permissions(administrator=True)  # Restrict to admins
 async def set_gift_card(ctx, *, code: str):
+    # Check if there's an existing code
+    if os.path.exists(GIFT_CARD_FILE):
+        gift_card = load_gift_card()
+        if "code" in gift_card:
+            await ctx.send(
+                f"⚠️ A gift card code is already set: `{gift_card['code']}`.\n"
+                f"Use `!reset_gift_card` to remove it before setting a new one."
+            )
+            return
+
+    # Save the new code
     gift_card = {"code": code, "set_by": str(ctx.author)}
     save_gift_card(gift_card)
     await ctx.send(f"🎁 Gift card code has been set by {ctx.author.mention}.")
