@@ -695,7 +695,7 @@ async def hatch(ctx):
 
         
 @bot.command()
-async def feed(ctx):
+async def pfeed(ctx):
     """Feed the user's pet using collected food."""
     user_id = str(ctx.author.id)
 
@@ -800,7 +800,7 @@ async def petstatus(ctx):
     )
 
 @bot.command()
-async def play(ctx):
+async def pplay(ctx):
     """Play with the user's pet to improve its mood."""
     user_id = str(ctx.author.id)
 
