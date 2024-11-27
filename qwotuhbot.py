@@ -89,14 +89,14 @@ def xp_bar(current_xp, level_up_xp, bar_length=20):
 
 # List of user IDs or usernames to exclude from the leaderboard
 # Replace these with your actual Discord user IDs
-excluded_user_ids = ["400402306836856833", "795417945105891352"]
-@bot.command()
+excluded_user_ids = ["795417945105891352"]
+
 async def leaderboard(ctx):
     # Filter out excluded users by checking their IDs
     filtered_users = {
         user_id: data for user_id, data in xp_data.items() if user_id not in excluded_user_ids
     }
-    
+
     # Sort the filtered users by level (and by XP as a secondary sort) in descending order
     sorted_users = sorted(
         filtered_users.items(),
@@ -114,14 +114,22 @@ async def leaderboard(ctx):
         level = data["level"]
         xp = data["xp"]
         prestige = data["prestige"]
+        badge_url = prestige_icons.get(prestige, "")  # Get badge URL or empty if not found
+        
+        # Format field with text and badge
+        field_value = (
+            f"Level: {level} | XP: {xp} | Prestige: {prestige}\n"
+            f"[![Badge]({badge_url})]({badge_url})" if badge_url else ""
+        )
         embed.add_field(
             name=f"{idx}. {user.display_name}",
-            value=f"Level: {level} | XP: {xp} | Prestige: {prestige}",
+            value=field_value,
             inline=False
         )
 
     # Send the leaderboard
     await ctx.send(embed=embed)
+
 
 
 async def level_up_announcement(message, level, prestige):
