@@ -107,8 +107,11 @@ GIFT_CARD_FILE = "gift_card.json"
 
 # Bot setup
 bot = commands.Bot(command_prefix="!")
+intents = discord.Intents.default()
+intents.members = True  
+intents.messages = True
 
-# Function to load the gift card code
+
 def load_gift_card():
     if os.path.exists(GIFT_CARD_FILE):
         with open(GIFT_CARD_FILE, "r") as file:
