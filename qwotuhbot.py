@@ -190,23 +190,23 @@ async def leaderboard(ctx):
         if idx == 1:
             field_name = f"**{medal} {user_display_name}** 🔥 {rank_change}"
             field_value = (
-                f"✨ **Level**: {level}\n"
-                f"🌟 **XP**: {xp}\n"
-                f"🏅 **Prestige**: {prestige} {badge}"
+                f"**Level**: {level}\n"
+                f"**XP**: {xp}\n"
+                f"**Prestige**: {prestige} {badge}"
             )
         elif idx == 2:
             field_name = f"**{medal} {user_display_name}** ⚡ {rank_change}"
             field_value = (
-                f"🌟 **Level**: {level}\n"
-                f"⚔️ **XP**: {xp}\n"
-                f"🔥 **Prestige**: {prestige} {badge}"
+                f"**Level**: {level}\n"
+                f"**XP**: {xp}\n"
+                f"**Prestige**: {prestige} {badge}"
             )
         elif idx == 3:
             field_name = f"**{medal} {user_display_name}** 🎯 {rank_change}"
             field_value = (
-                f"⚡ **Level**: {level}\n"
-                f"🏹 **XP**: {xp}\n"
-                f"✨ **Prestige**: {prestige} {badge}"
+                f"**Level**: {level}\n"
+                f"**XP**: {xp}\n"
+                f"**Prestige**: {prestige} {badge}"
             )
         else:
             # Regular formatting for other players
