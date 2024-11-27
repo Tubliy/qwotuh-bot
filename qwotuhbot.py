@@ -188,21 +188,21 @@ async def leaderboard(ctx):
 
         # Highlight top 3 players
         if idx == 1:
-            field_name = f"🎉 **{medal} {user_display_name}** 🔥 {rank_change}"
+            field_name = f"**{medal} {user_display_name}** 🔥 {rank_change}"
             field_value = (
                 f"✨ **Level**: {level}\n"
                 f"🌟 **XP**: {xp}\n"
                 f"🏅 **Prestige**: {prestige} {badge}"
             )
         elif idx == 2:
-            field_name = f"🎖️ **{medal} {user_display_name}** ⚡ {rank_change}"
+            field_name = f"**{medal} {user_display_name}** ⚡ {rank_change}"
             field_value = (
                 f"🌟 **Level**: {level}\n"
                 f"⚔️ **XP**: {xp}\n"
                 f"🔥 **Prestige**: {prestige} {badge}"
             )
         elif idx == 3:
-            field_name = f"🏆 **{medal} {user_display_name}** 🎯 {rank_change}"
+            field_name = f"**{medal} {user_display_name}** 🎯 {rank_change}"
             field_value = (
                 f"⚡ **Level**: {level}\n"
                 f"🏹 **XP**: {xp}\n"
@@ -216,11 +216,16 @@ async def leaderboard(ctx):
         # Add the field to the embed
         embed.add_field(name=field_name, value=field_value, inline=False)
 
+        # Add a separator after the top 3 players
+        if idx == 3:
+            embed.add_field(name="\u200b", value="\u200b", inline=False)  # Blank field for spacing
+
     # Send the leaderboard
     await ctx.send(embed=embed)
 
     # Save the new rankings to the file
     save_previous_ranks(new_ranks)
+
 
 
 
