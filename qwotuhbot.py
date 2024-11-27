@@ -106,7 +106,7 @@ def xp_bar(current_xp, level_up_xp, bar_length=20):
 GIFT_CARD_FILE = "gift_card.json"
 
 # Bot setup
-bot = commands.Bot(command_prefix="!")
+bot = commands.Bot(command_prefix="!", intents=intents)
 intents = discord.Intents.default()
 intents.members = True  
 intents.messages = True
