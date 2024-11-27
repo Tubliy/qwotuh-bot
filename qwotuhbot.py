@@ -102,6 +102,11 @@ def xp_bar(current_xp, level_up_xp, bar_length=20):
 
 
 
+from datetime import datetime, timedelta
+import os
+import json
+import discord
+
 # Medal emojis or Unicode
 medals = {
     1: "🥇",  # Gold medal
@@ -146,10 +151,24 @@ async def leaderboard(ctx):
         reverse=True
     )
 
+    # Calculate the time remaining until December 31st
+    now = datetime.now()
+    target_date = datetime(now.year, 12, 31, 23, 59, 59)
+    remaining_time = target_date - now
+
+    # Format the remaining time as days, hours, minutes
+    days, hours, minutes, seconds = (
+        remaining_time.days,
+        remaining_time.seconds // 3600,
+        (remaining_time.seconds % 3600) // 60,
+        remaining_time.seconds % 60,
+    )
+    countdown = f"**{days} days, {hours} hours, {minutes} minutes, {seconds} seconds**"
+
     # Create the leaderboard embed
     embed = discord.Embed(
         title="🏆 **Leaderboard** 🏆",
-        description="Top players based on **Level** and **XP**.\n\n",
+        description=f"⏳ Time left until **December 31st**: {countdown}\n\nTop players based on **Level** and **XP**.\n",
         color=discord.Color.gold()
     )
     embed.set_footer(text=f"🏅 Total Players: {len(filtered_users)} | Keep grinding! 💪")
@@ -188,25 +207,25 @@ async def leaderboard(ctx):
 
         # Highlight top 3 players
         if idx == 1:
-            field_name = f"**{medal} {user_display_name}** 🔥 {rank_change}"
+            field_name = f"🎉 **{medal} {user_display_name}** 🔥 {rank_change}"
             field_value = (
-                f"**Level**: {level}\n"
-                f"**XP**: {xp}\n"
-                f"**Prestige**: {prestige} {badge}"
+                f"✨ **Level**: {level}\n"
+                f"🌟 **XP**: {xp}\n"
+                f"🏅 **Prestige**: {prestige} {badge}"
             )
         elif idx == 2:
-            field_name = f"**{medal} {user_display_name}** ⚡ {rank_change}"
+            field_name = f"🎖️ **{medal} {user_display_name}** ⚡ {rank_change}"
             field_value = (
-                f"**Level**: {level}\n"
-                f"**XP**: {xp}\n"
-                f"**Prestige**: {prestige} {badge}"
+                f"🌟 **Level**: {level}\n"
+                f"⚔️ **XP**: {xp}\n"
+                f"🔥 **Prestige**: {prestige} {badge}"
             )
         elif idx == 3:
-            field_name = f"**{medal} {user_display_name}** 🎯 {rank_change}"
+            field_name = f"🏆 **{medal} {user_display_name}** 🎯 {rank_change}"
             field_value = (
-                f"**Level**: {level}\n"
-                f"**XP**: {xp}\n"
-                f"**Prestige**: {prestige} {badge}"
+                f"⚡ **Level**: {level}\n"
+                f"🏹 **XP**: {xp}\n"
+                f"✨ **Prestige**: {prestige} {badge}"
             )
         else:
             # Regular formatting for other players
@@ -225,10 +244,6 @@ async def leaderboard(ctx):
 
     # Save the new rankings to the file
     save_previous_ranks(new_ranks)
-
-
-
-
 
 
 
