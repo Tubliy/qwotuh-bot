@@ -245,10 +245,11 @@ async def leaderboard(ctx):
     }
 
     # Sort the filtered users by level (and by XP as a secondary sort) in descending order
+    # Sort the filtered users by prestige (primary), level (secondary), and XP (tertiary)
     sorted_users = sorted(
-        filtered_users.items(),
-        key=lambda item: (item[1]["level"], item[1]["xp"]),
-        reverse=True
+    filtered_users.items(),
+    key=lambda item: (item[1]["prestige"], item[1]["level"], item[1]["xp"]),
+    reverse=True  # Sort in descending order
     )
 
     # Calculate the time remaining until December 31st
@@ -309,23 +310,23 @@ async def leaderboard(ctx):
         if idx == 1:
             field_name = f"🎉 **{medal} {user_display_name}** 🔥 {rank_change}"
             field_value = (
-                f"✨ **Level**: {level}\n"
-                f"🌟 **XP**: {xp}\n"
-                f"🏅 **Prestige**: {prestige} {badge}"
+                f"**Level**: {level}\n"
+                f"**XP**: {xp}\n"
+                f"**Prestige**: {prestige} {badge}"
             )
         elif idx == 2:
             field_name = f"🎖️ **{medal} {user_display_name}** ⚡ {rank_change}"
             field_value = (
-                f"🌟 **Level**: {level}\n"
-                f"⚔️ **XP**: {xp}\n"
-                f"🔥 **Prestige**: {prestige} {badge}"
+                f"**Level**: {level}\n"
+                f"**XP**: {xp}\n"
+                f"**Prestige**: {prestige} {badge}"
             )
         elif idx == 3:
             field_name = f"🏆 **{medal} {user_display_name}** 🎯 {rank_change}"
             field_value = (
-                f"⚡ **Level**: {level}\n"
-                f"🏹 **XP**: {xp}\n"
-                f"✨ **Prestige**: {prestige} {badge}"
+                f"**Level**: {level}\n"
+                f"**XP**: {xp}\n"
+                f"**Prestige**: {prestige} {badge}"
             )
         else:
             # Regular formatting for other players
@@ -384,8 +385,6 @@ async def level_up_announcement(message, level, prestige):
     
     # Send the announcement to the channel
     await message.channel.send(embed=embed)
-
-
 
 
 def add_xp(user_id):
