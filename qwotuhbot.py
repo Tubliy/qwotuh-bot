@@ -110,8 +110,23 @@ medals = {
 
 excluded_user_ids = ["400402306836856833","795417945105891352"]
 
-# Example of previous rankings (you should update this after sending the leaderboard)
-previous_ranks = {}  # Store previous ranks: {user_id: previous_rank}
+# Path to the file where rankings will be stored
+RANKS_FILE = "previous_ranks.json"
+
+# Function to load previous ranks from the file
+def load_previous_ranks():
+    if os.path.exists(RANKS_FILE):
+        with open(RANKS_FILE, "r") as file:
+            return json.load(file)
+    return {}
+
+# Function to save previous ranks to the file
+def save_previous_ranks(ranks):
+    with open(RANKS_FILE, "w") as file:
+        json.dump(ranks, file)
+
+# Load the previous rankings at the start
+previous_ranks = load_previous_ranks()
 
 @bot.command()
 async def leaderboard(ctx):
@@ -171,8 +186,8 @@ async def leaderboard(ctx):
     # Send the leaderboard
     await ctx.send(embed=embed)
 
-    # Update the previous rankings
-    previous_ranks = new_ranks
+    # Save the new rankings to the file
+    save_previous_ranks(new_ranks)
 
 
 
