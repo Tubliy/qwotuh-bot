@@ -710,6 +710,43 @@ async def pfeed(ctx):
         f"Remaining food: {xp_data[user_id]['food']} 🍗"
     )
 
+
+
+
+@bot.command()
+async def preroll(ctx):
+    """Allows the user to reroll their pet once after hatching."""
+    user_id = str(ctx.author.id)
+
+    # Check if the user has a pet
+    if user_id not in pets:
+        await ctx.send("🐾 You don't have a pet to reroll! Use `!hatch` to adopt one first.")
+        return
+
+    # Check if the user has already rerolled
+    if pets[user_id].get("rerolled", False):
+        await ctx.send(f"🔄 You've already used your preroll for **{pets[user_id]['name']}**. No more rerolls allowed!")
+        return
+
+    # Allow reroll
+    new_pet = choose_pet()  # Pick a new pet
+    old_pet_name = pets[user_id]["name"]
+    pets[user_id].update({
+        "name": new_pet["name"],  # Update to new pet name
+        "type": new_pet["name"],  # Update type
+        "rarity": new_pet["rarity"],  # Update rarity
+        "hunger": 50,
+        "energy": 50,
+        "mood": 50,
+        "rerolled": True  # Mark as rerolled
+    })
+
+    await ctx.send(
+        f"🎉 You rerolled your pet! Your old pet **{old_pet_name}** has been replaced with a **{new_pet['name']}** "
+        f"({new_pet['rarity']} rarity). Take good care of it!"
+    )
+
+
 @bot.command()
 async def myfood(ctx):
     """Check the user's food inventory."""
@@ -1387,6 +1424,21 @@ async def kiss(ctx, member: discord.Member):
         await ctx.send("❌ You need to mention a user!")
         return
 
+async def process_xp(message):
+    """Handles XP addition and sends notifications if needed."""
+    user_id = str(message.author.id)
+    leveled_up = add_xp(user_id)
+
+    if leveled_up:
+        level = xp_data[user_id]["level"]
+        food = xp_data[user_id]["food"]
+        await message.channel.send(
+            f"🎉 {message.author.mention} leveled up to **Level {level}** and earned 1 🍗 food! Total food: {food}."
+        )
+
+        # Notify about pet hatching eligibility
+        if level % 5 == 0:
+            await message.channel.send(f"🐣 You're now eligible to hatch a new pet! Use `!hatch` to get one.")
 
     
 @bot.event
