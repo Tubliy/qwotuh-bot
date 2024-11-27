@@ -108,7 +108,7 @@ medals = {
     3: "🥉"   # Bronze medal
 }
 
-excluded_user_ids = ["795417945105891352"]
+excluded_user_ids = ["400402306836856833","795417945105891352"]
 
 @bot.command()
 async def leaderboard(ctx):
