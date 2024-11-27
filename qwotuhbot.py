@@ -436,6 +436,11 @@ async def double_xp(ctx):
     else:
         await ctx.send(f"✨ **Double XP** has been **deactivated** by {ctx.author.mention}. Back to normal XP. 😞")
 
+# Error handler for permission failure
+@double_xp.error
+async def double_xp_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send(f"❌ You must be an **Admin** to use this command, {ctx.author.mention}!")
 
 @bot.command()
 async def rank(ctx, member: discord.Member = None):
