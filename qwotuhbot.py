@@ -81,17 +81,17 @@ prestige_icons = {
 }
 
 prestige_emojis = {
-    0: ":badge0:",  # Replace with your custom emoji names or IDs
-    1: ":badge1:",
-    2: ":badge2:",
-    3: ":badge3:",
-    4: ":badge4:",
-    5: ":badge5:",
-    6: ":badge6:", 
-    7: ":badge7:",
-    8: ":badge8:",
-    9: ":badge9:",
-    10: ":master_prestige:"  # Example for prestige 10
+    0: "<:badge0:1311291601393553408>",  # Replace with your custom emoji names or IDs
+    1: "<:badge1:1311288342956216400>",
+    2: "<:badge2:1311288407263019008>",
+    3: "<:badge3:1311288462728495129>",
+    4: "<:badge4:1311288500775288842>",
+    5: "<:badge5:1311288579137474643>",
+    6: "<:badge6:1311288638608244736>", 
+    7: "<:badge7:1311288684045406249>",
+    8: "<:badge8:1311288799711723562>",
+    9: "<:badge9:1311288849321955350>",
+    10: "<:master_prestige:1311288923221135380>"  # Example for prestige 10
 }
 # XP bar function to show progress towards the next level
 def xp_bar(current_xp, level_up_xp, bar_length=20):
