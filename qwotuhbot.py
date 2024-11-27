@@ -388,33 +388,24 @@ async def level_up_announcement(message, level, prestige):
 
 
 def add_xp(user_id):
+    """Handle XP calculations and grant food on level-up."""
     if user_id not in xp_data:
-        xp_data[user_id] = {"xp": 0, "level": 1, "prestige": 0}
+        xp_data[user_id] = {"xp": 0, "level": 1, "prestige": 0, "food": 0}
 
-    # Base XP gain
-    base_xp = 20
-    if double_xp_active:  # Check if Double XP is active
+    base_xp = 10
+    if double_xp_active:
         base_xp *= 2
 
-    xp_data[user_id]["xp"] += base_xp  # Award XP
-    print(f"User {user_id} gained {base_xp} XP. (Double XP Active: {double_xp_active})")
+    xp_data[user_id]["xp"] += base_xp
 
-    level_up = False  # Flag to track level-up
+    level_up = False
     while True:
-        # Progressive XP required for each level
         level_up_xp = 100 * (1.5 ** (xp_data[user_id]["level"] - 1))
-
-        # Check for level-up
         if xp_data[user_id]["xp"] >= level_up_xp:
-            xp_data[user_id]["xp"] -= level_up_xp  # Carry over excess XP
+            xp_data[user_id]["xp"] -= level_up_xp
             xp_data[user_id]["level"] += 1
+            xp_data[user_id]["food"] += 1  # Grant 1 food per level-up
             level_up = True
-
-            # Check for prestige
-            if xp_data[user_id]["level"] > 25:
-                xp_data[user_id]["level"] = 1
-                if xp_data[user_id]["prestige"] < 10:
-                    xp_data[user_id]["prestige"] += 1
         else:
             break
 
@@ -422,7 +413,22 @@ def add_xp(user_id):
     with open("xp_data.json", "w") as f:
         json.dump(xp_data, f)
 
-    return level_up  # Indicates whether a level-up occurred
+    return level_up
+
+
+async def process_xp(message):
+    """Handles XP addition and sends notifications if needed."""
+    user_id = str(message.author.id)
+    leveled_up = add_xp(user_id)
+
+    if leveled_up:
+        level = xp_data[user_id]["level"]
+        await message.channel.send(f"🎉 {message.author.mention} leveled up to **Level {level}**!")
+
+        # Notify about pet hatching eligibility
+        if level % 5 == 0:
+            await message.channel.send(f"🐣 You're now eligible to hatch a new pet! Use `!hatch` to get one.")
+
 
 @bot.command()
 @commands.has_permissions(administrator=True)  # Restrict to admins
@@ -614,15 +620,201 @@ async def on_member_join(member):
     except discord.Forbidden:
         print(f"Could not send a DM to {member.name}.")
 
-import requests
-import discord
-from discord.ext import commands
+import random
 
-# Replace this with your actual API key from RapidAPI
-API_KEY = "78187b8c75msh12c016a76ad49a0p1daa54jsnafc897edeec"
+# Dictionary to store pets for users
+pets = {}
 
-# Base URL for the Would You Rather API
-BASE_URL = "https://would-you-rather.p.rapidapi.com/wyr"
+# List of available pets with their rarities
+available_pets = [
+    {"name": "Pig", "rarity": "Normal"},
+    {"name": "Dragon", "rarity": "Rare"},
+    {"name": "Dog", "rarity": "Normal"},
+    {"name": "Cyclops", "rarity": "Rare"},
+    {"name": "Qwotuh", "rarity": "Ultra Rare"},
+    {"name": "Phoenix", "rarity": "Legendary"},
+    {"name": "Unicorn", "rarity": "Rare"},
+    {"name": "Slime", "rarity": "Normal"},
+    {"name": "Griffin", "rarity": "Legendary"}
+]
+
+# Chance distribution for each rarity
+rarity_weights = {
+    "Normal": 70,  # 70% chance
+    "Rare": 20,    # 20% chance
+    "Ultra Rare": 8,  # 8% chance
+    "Legendary": 2   # 2% chance
+}
+
+def choose_pet():
+    # Filter pets by rarity and pick one based on weighted probabilities
+    chosen_rarity = random.choices(
+        list(rarity_weights.keys()), weights=rarity_weights.values(), k=1
+    )[0]
+    pets_in_rarity = [pet for pet in available_pets if pet["rarity"] == chosen_rarity]
+    return random.choice(pets_in_rarity)
+
+@bot.command()
+async def hatch(ctx):
+    user_id = str(ctx.author.id)
+
+    # Check if user is eligible to hatch
+    if user_id not in xp_data or xp_data[user_id]["level"] < 5:
+        await ctx.send(f"🐣 You need to be at least level 5 to hatch a pet! You're currently level {xp_data.get(user_id, {}).get('level', 0)}.")
+        return
+
+    if user_id in pets:
+        await ctx.send(f"🐾 You already have a pet named **{pets[user_id]['name']}**! Use `!pet_status` to check on it.")
+        return
+
+    # Choose a random pet
+    pet = choose_pet()
+
+    # Ask the user to name their pet
+    await ctx.send(f"🎉 You hatched a **{pet['name']}** ({pet['rarity']} rarity)! What would you like to name it? Type your desired name in the chat.")
+
+    def check(m):
+        return m.author == ctx.author and m.channel == ctx.channel
+
+    try:
+        response = await bot.wait_for("message", check=check, timeout=30)
+        pet_name = response.content
+
+        # Save the pet to the user's data
+        pets[user_id] = {
+            "name": pet_name,
+            "type": pet["name"],
+            "rarity": pet["rarity"],
+            "hunger": 50,
+            "energy": 50,
+            "mood": 50
+        }
+        await ctx.send(f"🐾 Congratulations! Your pet **{pet_name}** (a {pet['name']}) has been added to your collection!")
+    except asyncio.TimeoutError:
+        await ctx.send("⏰ You took too long to name your pet! Please try `!hatch` again.")
+
+        
+@bot.command()
+async def feed(ctx):
+    """Feed the user's pet using collected food."""
+    user_id = str(ctx.author.id)
+
+    if user_id not in pets:
+        await ctx.send("🐾 You don't have a pet yet! Use `!hatch` to adopt one.")
+        return
+
+    if xp_data[user_id]["food"] <= 0:
+        await ctx.send("🍗 You don't have any food to feed your pet! Level up to collect more food.")
+        return
+
+    # Feed the pet and update stats
+    pet = pets[user_id]
+    pet["hunger"] = min(100, pet["hunger"] + 20)  # Restore hunger
+    pet["mood"] = min(100, pet["mood"] + 10)      # Feeding improves mood
+    xp_data[user_id]["food"] -= 1  # Consume 1 food
+
+    await ctx.send(
+        f"🍖 You fed **{pet['name']}**! Hunger: {pet['hunger']}/100, Mood: {pet['mood']}/100.\n"
+        f"Remaining food: {xp_data[user_id]['food']} 🍗"
+    )
+
+@bot.command()
+async def myfood(ctx):
+    """Check the user's food inventory."""
+    user_id = str(ctx.author.id)
+
+    if user_id not in xp_data:
+        await ctx.send("🍗 You don't have any food yet. Start leveling up to collect food!")
+        return
+
+    food_count = xp_data[user_id]["food"]
+    await ctx.send(f"🍗 You have **{food_count} food** in your inventory.")
+
+@bot.command()
+async def petleaderboard(ctx):
+    """Display the pet leaderboard with user names, pet names, types, rarities, and mood."""
+    if not pets:
+        await ctx.send("🐾 No pets have been adopted yet!")
+        return
+
+    # Sort pets by mood in descending order
+    sorted_pets = sorted(
+        pets.items(), key=lambda x: x[1]["mood"], reverse=True
+    )
+
+    # Create the leaderboard embed
+    embed = discord.Embed(
+        title="🏆 **Pet Leaderboard** 🐾",
+        description="Top pets ranked by mood and their owners.",
+        color=discord.Color.purple()
+    )
+    embed.set_footer(text=f"Total Pets: {len(pets)} | Keep taking care of your pets!")
+
+    # Add the top pets to the leaderboard
+    for idx, (user_id, pet_data) in enumerate(sorted_pets[:10], start=1):  # Limit to top 10
+        try:
+            # Fetch the username
+            user = await bot.fetch_user(int(user_id))
+            username = user.name
+        except discord.NotFound:
+            username = f"Unknown User ({user_id})"
+
+        # Extract pet details
+        pet_name = pet_data["name"]
+        pet_type = pet_data["type"]
+        pet_rarity = pet_data["rarity"]
+        pet_mood = pet_data["mood"]
+
+        # Add rank-specific icons (optional)
+        medal = "🥇" if idx == 1 else "🥈" if idx == 2 else "🥉" if idx == 3 else f"#{idx}"
+
+        # Add pet details to the embed
+        embed.add_field(
+            name=f"{medal} {username}'s Pet: **{pet_name}**",
+            value=f"Type: {pet_type} | Rarity: {pet_rarity} | Mood: {pet_mood}/100",
+            inline=False
+        )
+
+    # Send the leaderboard embed
+    await ctx.send(embed=embed)
+
+@bot.command()
+async def petstatus(ctx):
+    """Check the current status of the user's pet."""
+    user_id = str(ctx.author.id)
+
+    if user_id not in pets:
+        await ctx.send("🐾 You don't have a pet yet! Use `!hatch` to adopt one.")
+        return
+
+    pet = pets[user_id]
+    hunger_status = "🍖 Full" if pet["hunger"] > 70 else "🍗 Hungry" if pet["hunger"] > 30 else "🥩 Starving"
+    energy_status = "💪 Energetic" if pet["energy"] > 70 else "😴 Tired" if pet["energy"] > 30 else "😵 Exhausted"
+    mood_status = "😊 Happy" if pet["mood"] > 70 else "😐 Neutral" if pet["mood"] > 30 else "😢 Sad"
+
+    await ctx.send(
+        f"🐾 **{pet['name']}'s Status**:\n"
+        f"- Hunger: {pet['hunger']}/100 ({hunger_status})\n"
+        f"- Energy: {pet['energy']}/100 ({energy_status})\n"
+        f"- Mood: {pet['mood']}/100 ({mood_status})"
+    )
+
+@bot.command()
+async def play(ctx):
+    """Play with the user's pet to improve its mood."""
+    user_id = str(ctx.author.id)
+
+    if user_id not in pets:
+        await ctx.send("🐾 You don't have a pet yet! Use `!hatch` to adopt one.")
+        return
+
+    pet = pets[user_id]
+    if pet["energy"] >= 20:
+        pet["mood"] = min(100, pet["mood"] + 20)  # Improve mood
+        pet["energy"] = max(0, pet["energy"] - 20)  # Consume energy
+        await ctx.send(f"🎾 You played with **{pet['name']}**! Mood: {pet['mood']}/100, Energy: {pet['energy']}/100.")
+    else:
+        await ctx.send(f"😴 **{pet['name']}** is too tired to play! Let them rest.")
 
 @bot.command()
 async def dance(ctx, member: discord.Member):
@@ -634,6 +826,27 @@ async def dance(ctx, member: discord.Member):
 async def reverse(ctx, *, text: str):
     await ctx.send(f"🔄 {text[::-1]}")
 
+@tasks.loop(minutes=30)  # Adjust decay interval as needed
+async def pet_decay():
+    """Apply decay to all pets over time."""
+    for user_id, pet in pets.items():
+        pet["hunger"] = max(0, pet["hunger"] - 10)  # Hunger decreases
+        pet["energy"] = max(0, pet["energy"] - 5)   # Energy decreases
+        if pet["hunger"] < 30:  # Low hunger negatively affects mood
+            pet["mood"] = max(0, pet["mood"] - 10)
+
+        # Check for neglect (e.g., very low stats)
+        if pet["hunger"] == 0 and pet["mood"] == 0:
+            # Optionally notify the user about their neglected pet
+            user = await bot.fetch_user(int(user_id))
+            if user:
+                try:
+                    await user.send(
+                        f"😢 Your pet **{pet['name']}** is feeling abandoned! "
+                        f"Feed and play with them soon to cheer them up!"
+                    )
+                except discord.Forbidden:
+                    pass  # User has DMs disabled
 
 @bot.command()
 async def socials(ctx):
@@ -904,6 +1117,7 @@ async def live_twitchcheck():
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} is online!')
+    pet_decay.start()
     check_and_send_gift_card.start()
     if not update_count.is_running():
         print("Starting upate_count task...")
@@ -1198,13 +1412,8 @@ async def on_message(message):
             return  # Stop further processing if banned
 
   # Add XP and check for level-up
-    user_id = str(message.author.id)
-    leveled_up = add_xp(user_id)  # This will set leveled_up to True if they leveled up
+    await process_xp(message)
 
-    # Announce level-up if applicable
-    if leveled_up:
-        # Pass the full `message` object to `level_up_announcement`
-        await level_up_announcement(message, xp_data[user_id]["level"], xp_data[user_id]["prestige"])
     
     await bot.process_commands(message)
   
