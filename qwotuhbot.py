@@ -101,9 +101,6 @@ def xp_bar(current_xp, level_up_xp, bar_length=20):
     return f"[{bar}] {int(progress * 100)}%"
 
 
-import os
-import json
-import discord
 
 # Medal emojis or Unicode
 medals = {
@@ -189,9 +186,34 @@ async def leaderboard(ctx):
         # Add medals for top 3
         medal = medals.get(idx, "")
 
-        # Format the leaderboard field
-        field_name = f"{medal} {user_display_name} {rank_change}"
-        field_value = f"✨ **Level**: {level} | **XP**: {xp} | **Prestige**: {prestige} {badge}"
+        # Highlight top 3 players
+        if idx == 1:
+            field_name = f"🎉 **{medal} {user_display_name}** 🔥 {rank_change}"
+            field_value = (
+                f"✨ **Level**: {level}\n"
+                f"🌟 **XP**: {xp}\n"
+                f"🏅 **Prestige**: {prestige} {badge}"
+            )
+        elif idx == 2:
+            field_name = f"🎖️ **{medal} {user_display_name}** ⚡ {rank_change}"
+            field_value = (
+                f"🌟 **Level**: {level}\n"
+                f"⚔️ **XP**: {xp}\n"
+                f"🔥 **Prestige**: {prestige} {badge}"
+            )
+        elif idx == 3:
+            field_name = f"🏆 **{medal} {user_display_name}** 🎯 {rank_change}"
+            field_value = (
+                f"⚡ **Level**: {level}\n"
+                f"🏹 **XP**: {xp}\n"
+                f"✨ **Prestige**: {prestige} {badge}"
+            )
+        else:
+            # Regular formatting for other players
+            field_name = f"{idx}. {user_display_name} {rank_change}"
+            field_value = f"Lvl: {level} | XP: {xp} | P: {prestige}"
+
+        # Add the field to the embed
         embed.add_field(name=field_name, value=field_value, inline=False)
 
     # Send the leaderboard
@@ -199,6 +221,7 @@ async def leaderboard(ctx):
 
     # Save the new rankings to the file
     save_previous_ranks(new_ranks)
+
 
 
 
