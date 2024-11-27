@@ -619,7 +619,7 @@ import discord
 from discord.ext import commands
 
 # Replace this with your actual API key from RapidAPI
-API_KEY = "your_rapidapi_key_here"
+API_KEY = "78187b8c75msh12c016a76ad49a0p1daa54jsnafc897edeec"
 
 # Base URL for the Would You Rather API
 BASE_URL = "https://would-you-rather.p.rapidapi.com/wyr"
@@ -629,7 +629,7 @@ async def wyr(ctx):
     try:
         # Make a request to the API
         headers = {
-            "X-RapidAPI-Key": "78187b8c75msh12c016a76ad49a0p1daa54jsnafc897edeec",
+            "X-RapidAPI-Key": API_KEY,
             "X-RapidAPI-Host": "would-you-rather.p.rapidapi.com"
         }
         response = requests.get(BASE_URL, headers=headers)
