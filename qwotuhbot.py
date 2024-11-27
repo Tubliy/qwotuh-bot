@@ -21,6 +21,7 @@ import traceback
 import re
 import math
 import json
+from datetime import datetime
 
 logging.basicConfig(level=logging.INFO, filename='/home/tubliy/qwotuh-bot/bot.log')
 # Define intents
@@ -101,11 +102,85 @@ def xp_bar(current_xp, level_up_xp, bar_length=20):
     return f"[{bar}] {int(progress * 100)}%"
 
 
+# Path to store the gift card code
+GIFT_CARD_FILE = "gift_card.json"
 
-from datetime import datetime, timedelta
-import os
-import json
-import discord
+# Bot setup
+bot = commands.Bot(command_prefix="!")
+
+# Function to load the gift card code
+def load_gift_card():
+    if os.path.exists(GIFT_CARD_FILE):
+        with open(GIFT_CARD_FILE, "r") as file:
+            return json.load(file)
+    return {}
+
+# Function to save the gift card code
+def save_gift_card(gift_card):
+    with open(GIFT_CARD_FILE, "w") as file:
+        json.dump(gift_card, file)
+
+# Command to set the gift card code
+@bot.command()
+@commands.has_permissions(administrator=True)  # Restrict to admins
+async def set_gift_card(ctx, *, code: str):
+    gift_card = {"code": code, "set_by": str(ctx.author)}
+    save_gift_card(gift_card)
+    await ctx.send(f"🎁 Gift card code has been set by {ctx.author.mention}.")
+
+# Scheduled task to DM the top user
+@tasks.loop(minutes=1)  # Check every minute
+async def check_and_send_gift_card():
+    now = datetime.now()
+    target_date = datetime(now.year, 12, 31, 23, 59)  # December 31st at 11:59 PM
+
+    # Check if it's time to send the gift card
+    if now >= target_date:
+        # Fetch the gift card
+        gift_card = load_gift_card()
+        if not gift_card or "code" not in gift_card:
+            print("❌ No gift card code has been set! Please set it using !set_gift_card <code>.")
+            # Notify a specific admin or log this
+            owner = bot.get_user(400402306836856833)  # Replace OWNER_ID with the bot owner's Discord ID
+            if owner:
+                try:
+                    await owner.send(
+                        "🚨 Gift card code has not been set! Use `!set_gift_card <code>` to set it."
+                    )
+                except discord.Forbidden:
+                    print("Failed to notify the bot owner about the missing gift card code.")
+            return
+
+        # Get the top user from the leaderboard
+        filtered_users = {
+            user_id: data for user_id, data in xp_data.items() if user_id not in excluded_user_ids
+        }
+        sorted_users = sorted(
+            filtered_users.items(),
+            key=lambda item: (item[1]["level"], item[1]["xp"]),
+            reverse=True
+        )
+
+        if not sorted_users:
+            print("No users found in the leaderboard!")
+            return
+
+        top_user_id, _ = sorted_users[0]  # Get the first user on the leaderboard
+        try:
+            user = await bot.fetch_user(int(top_user_id))
+            await user.send(
+                f"🎉 Congratulations! You are the top player on the leaderboard as of December 31st!\n"
+                f"🎁 Here is your gift card code: **{gift_card['code']}**\n\n"
+                f"Thank you for participating!"
+            )
+            print(f"Gift card sent to {user}.")
+        except discord.Forbidden:
+            print(f"Failed to send DM to {top_user_id} (DMs might be closed).")
+
+        # Stop the task after sending the gift card
+        check_and_send_gift_card.stop()
+
+
 
 # Medal emojis or Unicode
 medals = {
@@ -755,6 +830,7 @@ async def live_twitchcheck():
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} is online!')
+    check_and_send_gift_card.start()
     if not update_count.is_running():
         print("Starting upate_count task...")
         update_count.start()
@@ -773,6 +849,7 @@ async def on_ready():
         live_tiktokcheck.start()
     else:
         print("live_tiktokcheck task is already running.")
+    
         
 
 @bot.command()
