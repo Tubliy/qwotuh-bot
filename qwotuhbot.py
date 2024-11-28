@@ -22,7 +22,7 @@ import traceback
 import re
 import math
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 logging.basicConfig(level=logging.INFO, filename='/home/tubliy/qwotuh-bot/bot.log')
 # Define intents
@@ -724,39 +724,77 @@ async def pfeed(ctx):
         f"🍖 You fed **{pets[user_id]['name']}**! Hunger: {pets[user_id]['hunger']}/100, Mood: {pets[user_id]['mood']}/100."
     )
 
+def save_xp_data():
+    """Save the XP data to a file."""
+    try:
+        with open("xp_data.json", "w") as f:
+            json.dump(xp_data, f)
+    except Exception as e:
+        print(f"Error saving XP data: {e}")
+
+
+def load_xp_data():
+    """Load the XP data from a file."""
+    try:
+        with open("xp_data.json", "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {}
+    except Exception as e:
+        print(f"Error loading XP data: {e}")
+        return {}
+
+
+last_work_time = {}
+
 @bot.command()
 async def pwork(ctx):
-    """Send your pet to work for rewards."""
+    """Send your pet to work for a random XP reward every 24 hours."""
     user_id = str(ctx.author.id)
 
     if user_id not in pets:
         await ctx.send("🐾 You don't have a pet yet! Use `!hatch` to adopt one.")
         return
 
-    pet = pets[user_id]
-    if pet["energy"] < 30:
-        await ctx.send(f"😴 **{pet['name']}** is too tired to work! Let them rest with `!prest`.")
-        return
+    # Check the cooldown
+    now = datetime.now()
+    if user_id in last_work_time:
+        next_allowed_time = last_work_time[user_id] + timedelta(hours=24)
+        if now < next_allowed_time:
+            remaining_time = next_allowed_time - now
+            hours, remainder = divmod(remaining_time.seconds, 3600)
+            minutes = remainder // 60
+            await ctx.send(
+                f"⏳ **{ctx.author.display_name}**, your pet can go to work again in **{hours}h {minutes}m**."
+            )
+            return
 
-    # Calculate random rewards
-    reward_food = random.randint(1, 3)
-    reward_xp = random.randint(10, 30)
+    # Randomize rewards
+    reward_chance = random.random()  # Generate a random number between 0 and 1
+    if reward_chance <= 0.0001:  # 0.01% chance for 10,000 XP
+        reward_xp = 10000
+    else:
+        reward_xp = random.randint(400, 3000)  # Random XP between 400 and 3000
 
-    # Update pet stats
-    pet["energy"] = max(0, pet["energy"] - 30)  # Reduce energy
-    inventory[user_id] = inventory.get(user_id, {"food": 0})
-    inventory[user_id]["food"] += reward_food
-    xp_data[user_id]["xp"] += reward_xp  # Update user XP if using an XP system
-    save_inventory()
-    save_pets()
+    # Update the last work time
+    last_work_time[user_id] = now
 
-    await ctx.send(
-        f"💼 **{pet['name']}** went to work and earned:\n"
-        f"- 🍗 {reward_food} food\n"
-        f"- ⭐ {reward_xp} XP\n"
-        f"Energy: {pet['energy']}/100"
+    # Update pet owner's XP
+    xp_data[user_id] = xp_data.get(user_id, {"xp": 0, "level": 1, "prestige": 0})
+    xp_data[user_id]["xp"] += reward_xp
+    save_xp_data()
+
+    # Notify the user of the rewards
+    reward_message = (
+        "🎉 **Jackpot!**" if reward_xp == 10000 else
+        "⭐ **Amazing!**" if reward_xp > 2000 else
+        "👍 **Good job!**"
     )
-
+    await ctx.send(
+        f"💼 **{pets[user_id]['name']}** went to work and earned:\n"
+        f"- {reward_message} **{reward_xp} XP**\n"
+        f"Great job! They can work again in 24 hours."
+    )
 
 @bot.command()
 async def preroll(ctx):
@@ -905,9 +943,13 @@ async def pstatus(ctx):
     # Send the embed
     await ctx.send(embed=embed)
 
+import random
+from discord.ui import Button, View
+import asyncio
+
 @bot.command()
 async def pbattle(ctx, member: discord.Member):
-    """Battle your pet with another user's pet via random game."""
+    """Battle your pet with another user's pet."""
     user_id = str(ctx.author.id)
     opponent_id = str(member.id)
 
@@ -915,7 +957,46 @@ async def pbattle(ctx, member: discord.Member):
         await ctx.send("🐾 Both players need pets to battle!")
         return
 
-    # Randomly select a game
+    # Ask the opponent to accept the challenge
+    accept_button = Button(label="Accept", style=discord.ButtonStyle.success)
+    decline_button = Button(label="Decline", style=discord.ButtonStyle.danger)
+
+    accepted = False  # Track if the battle is accepted
+
+    async def accept_callback(interaction: discord.Interaction):
+        nonlocal accepted
+        if interaction.user.id == member.id:
+            accepted = True
+            await interaction.response.edit_message(content=f"🎮 {member.display_name} accepted the battle!", view=None)
+
+    async def decline_callback(interaction: discord.Interaction):
+        if interaction.user.id == member.id:
+            await interaction.response.edit_message(content=f"❌ {member.display_name} declined the battle!", view=None)
+
+    accept_button.callback = accept_callback
+    decline_button.callback = decline_callback
+
+    view = View()
+    view.add_item(accept_button)
+    view.add_item(decline_button)
+
+    # Send the battle request message
+    battle_request = await ctx.send(
+        f"⚔️ {ctx.author.display_name} challenges {member.display_name} to a pet battle! Will you accept?",
+        view=view
+    )
+
+    # Wait for the opponent to respond
+    try:
+        await asyncio.sleep(30)  # Timeout after 30 seconds
+        if not accepted:
+            await battle_request.edit(content=f"⏰ {member.display_name} did not respond in time. The battle is canceled.", view=None)
+            return
+    except asyncio.TimeoutError:
+        await battle_request.edit(content=f"⏰ {member.display_name} did not respond in time. The battle is canceled.", view=None)
+        return
+
+    # If accepted, randomly choose a game
     game = random.choice(["connect4", "race"])
 
     if game == "connect4":
@@ -1005,17 +1086,27 @@ async def play_connect4(ctx, member):
             await ctx.send(f"❌ Column {column + 1} is full! Try a different column.")
 
 async def play_race(ctx, member):
-    """Play a pet race game as part of the pet battle."""
-    # Initialize scores
+    """Play a pet race game with a dynamic progress bar using pet emojis."""
+    # Initialize scores and progress
+    progress = {ctx.author.id: 0, member.id: 0}
+    max_progress = 100  # Distance to finish line
     scores = {ctx.author.id: 0, member.id: 0}
 
-    # Create buttons
+    # Get pet emojis for the players
+    player1_pet = pets[str(ctx.author.id)]
+    player2_pet = pets[str(member.id)]
+    player1_emoji = player1_pet["emoji"]
+    player2_emoji = player2_pet["emoji"]
+
+    # Create buttons for tapping
     button1 = Button(label=f"{ctx.author.display_name}'s Pet", style=discord.ButtonStyle.primary)
     button2 = Button(label=f"{member.display_name}'s Pet", style=discord.ButtonStyle.danger)
 
     async def button1_callback(interaction: discord.Interaction):
         if interaction.user.id == ctx.author.id:
             scores[ctx.author.id] += 1
+            progress[ctx.author.id] = min(max_progress, progress[ctx.author.id] + 5)  # Increase progress
+            await update_progress_message()
             await interaction.response.defer()
         else:
             await interaction.response.send_message("This is not your button!", ephemeral=True)
@@ -1023,6 +1114,8 @@ async def play_race(ctx, member):
     async def button2_callback(interaction: discord.Interaction):
         if interaction.user.id == member.id:
             scores[member.id] += 1
+            progress[member.id] = min(max_progress, progress[member.id] + 5)  # Increase progress
+            await update_progress_message()
             await interaction.response.defer()
         else:
             await interaction.response.send_message("This is not your button!", ephemeral=True)
@@ -1030,40 +1123,75 @@ async def play_race(ctx, member):
     button1.callback = button1_callback
     button2.callback = button2_callback
 
+    # Create the view with buttons
     view = View()
     view.add_item(button1)
     view.add_item(button2)
 
-    # Start the race
-    message = await ctx.send(
-        f"🏁 **Pet Race!** 🏁\nTap the button as fast as you can to make your pet run faster! 🐾",
+    # Initial race message
+    race_message = await ctx.send(
+        f"🏁 **Pet Race!** 🏁\nTap the button to move your pet forward! First to {max_progress} wins! 🐾",
         view=view
     )
 
-    await asyncio.sleep(15)
+    # Function to generate progress bars
+    def generate_progress_bar(progress_value, emoji):
+        bar_length = 20  # Total length of the bar
+        filled_length = int((progress_value / max_progress) * bar_length)
+        bar = emoji * filled_length + "□" * (bar_length - filled_length)
+        return f"[{bar}] {progress_value}/{max_progress}"
+
+    # Function to update the race message
+    async def update_progress_message():
+        player1_bar = generate_progress_bar(progress[ctx.author.id], player1_emoji)
+        player2_bar = generate_progress_bar(progress[member.id], player2_emoji)
+
+        await race_message.edit(
+            content=(
+                f"🏁 **Pet Race!** 🏁\n"
+                f"Tap the button to move your pet forward! First to {max_progress} wins! 🐾\n\n"
+                f"{player1_emoji} {ctx.author.display_name}'s Pet:\n{player1_bar}\n\n"
+                f"{player2_emoji} {member.display_name}'s Pet:\n{player2_bar}"
+            )
+        )
+
+    # Wait for the race to end
+    start_time = asyncio.get_event_loop().time()
+    race_duration = 15  # Race lasts 15 seconds
+    while asyncio.get_event_loop().time() - start_time < race_duration:
+        if progress[ctx.author.id] >= max_progress or progress[member.id] >= max_progress:
+            break
+        await asyncio.sleep(0.5)  # Update every 0.5 seconds
 
     # Disable buttons after the race
     button1.disabled = True
     button2.disabled = True
-    await message.edit(view=view)
+    await race_message.edit(view=view)
 
     # Determine the winner
-    if scores[ctx.author.id] > scores[member.id]:
+    if progress[ctx.author.id] >= max_progress:
         await reward_player(ctx.author)
         await ctx.send(f"🎉 **{ctx.author.display_name}**'s pet wins the race! 🏆")
-    elif scores[ctx.author.id] < scores[member.id]:
+    elif progress[member.id] >= max_progress:
         await reward_player(member)
         await ctx.send(f"🎉 **{member.display_name}**'s pet wins the race! 🏆")
     else:
-        await ctx.send("🤝 It's a draw! Both pets are equally fast!")
-
+        # Compare progress if time runs out
+        if progress[ctx.author.id] > progress[member.id]:
+            await reward_player(ctx.author)
+            await ctx.send(f"🎉 **{ctx.author.display_name}**'s pet wins by progress! 🏆")
+        elif progress[ctx.author.id] < progress[member.id]:
+            await reward_player(member)
+            await ctx.send(f"🎉 **{member.display_name}**'s pet wins by progress! 🏆")
+        else:
+            await ctx.send("🤝 It's a draw! Both pets are equally fast!")
+    pass
+    
 async def reward_player(player):
-    """Reward the player with food."""
     user_id = str(player.id)
     inventory[user_id] = inventory.get(user_id, {"food": 0})
     inventory[user_id]["food"] += 2
     save_inventory()
-
 
 
 @bot.command()
