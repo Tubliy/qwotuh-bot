@@ -910,6 +910,7 @@ async def pbattle(ctx, member: discord.Member):
     user_id = str(ctx.author.id)
     opponent_id = str(member.id)
 
+    # Check if both users have pets
     if user_id not in pets or opponent_id not in pets:
         await ctx.send("🐾 Both users need to have pets to battle!")
         return
@@ -917,17 +918,24 @@ async def pbattle(ctx, member: discord.Member):
     user_pet = pets[user_id]
     opponent_pet = pets[opponent_id]
 
-    # Random winner
+    # Randomly determine the winner
     winner_id = random.choice([user_id, opponent_id])
     winner_pet = pets[winner_id]
-    inventory[winner_id]["food"] = inventory.get(winner_id, {}).get("food", 0) + 2
 
+    # Ensure the winner has an entry in the inventory
+    if winner_id not in inventory:
+        inventory[winner_id] = {"food": 0}  # Initialize inventory if missing
+
+    # Add food reward to the winner's inventory
+    inventory[winner_id]["food"] += 2
     save_inventory()
 
+    # Notify the players of the outcome
     await ctx.send(
         f"⚔️ **{user_pet['name']}** ({user_pet['emoji']}) battled **{opponent_pet['name']}** ({opponent_pet['emoji']})!\n"
         f"🎉 The winner is **{winner_pet['name']}**! They earned 2 🍗 food."
     )
+
 
 @bot.command()
 async def pplay(ctx):
