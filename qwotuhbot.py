@@ -1671,8 +1671,8 @@ async def help(ctx):
         .add_field(name="!ppsize", value="Displays your pp size.", inline=False)
         .add_field(name="!hug", value="Give someone a hug.", inline=False)
         .add_field(name="!meme", value="Display a random meme.", inline=False)
-        .add_field(name="!eightball", value="Test the magic 8ball.", inline=False),
-        .add_field(name="!kiss", value="Give someone a kiss.", inline=False)
+        .add_field(name="!eightball", value="Test the magic 8ball.", inline=False)
+        .add_field(name="!kiss", value="Give someone a kiss.", inline=False),
 
         # Page 3: Game Commands
         discord.Embed(title="Help - Game Commands", color=discord.Color.purple())
@@ -1682,15 +1682,15 @@ async def help(ctx):
 
         # Page 4: Pet Commands
         discord.Embed(title="Help - Pet Commands", color=discord.Color.orange())
-        .add_field(name="!hatch", value="Hatch a pet.", inline=False),
-        .add_field(name="!pstatus", value="Check your pet's status.", inline=False),
-        .add_field(name="!preroll", value="Reroll pet (one time usage).", inline=False),
-        .add_field(name="!prename", value="Rename your pet.", inline=False),
-        .add_field(name="!pleaderboard", value="Display pet leaderboard.", inline=False),
-        .add_field(name="!pinv", value="Check your food.", inline=False),
-        .add_field(name="!pplay", value="Play with your pet.", inline=False),
-        .add_field(name="!pfeed", value="Feed your pet.", inline=False),
-        .add_field(name="!pwork", value="Send your pet to work for rewards.", inline=False),
+        .add_field(name="!hatch", value="Hatch a pet.", inline=False)
+        .add_field(name="!pstatus", value="Check your pet's status.", inline=False)
+        .add_field(name="!preroll", value="Reroll pet (one time usage).", inline=False)
+        .add_field(name="!prename", value="Rename your pet.", inline=False)
+        .add_field(name="!pleaderboard", value="Display pet leaderboard.", inline=False)
+        .add_field(name="!pinv", value="Check your food.", inline=False)
+        .add_field(name="!pplay", value="Play with your pet.", inline=False)
+        .add_field(name="!pfeed", value="Feed your pet.", inline=False)
+        .add_field(name="!pwork", value="Send your pet to work for rewards.", inline=False)
         .add_field(name="!pbattle", value="Battle other pets.", inline=False),
     ]
 
