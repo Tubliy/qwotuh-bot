@@ -4,6 +4,7 @@ import yt_dlp
 import asyncio
 import requests
 from discord.ext import commands, tasks
+from discord.ui import Button, View
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -906,35 +907,163 @@ async def pstatus(ctx):
 
 @bot.command()
 async def pbattle(ctx, member: discord.Member):
-    """Battle your pet with another user's pet."""
+    """Battle your pet with another user's pet via random game."""
     user_id = str(ctx.author.id)
     opponent_id = str(member.id)
 
-    # Check if both users have pets
     if user_id not in pets or opponent_id not in pets:
-        await ctx.send("🐾 Both users need to have pets to battle!")
+        await ctx.send("🐾 Both players need pets to battle!")
         return
 
-    user_pet = pets[user_id]
-    opponent_pet = pets[opponent_id]
+    # Randomly select a game
+    game = random.choice(["connect4", "race"])
 
-    # Randomly determine the winner
-    winner_id = random.choice([user_id, opponent_id])
-    winner_pet = pets[winner_id]
+    if game == "connect4":
+        await play_connect4(ctx, member)
+    elif game == "race":
+        await play_race(ctx, member)
 
-    # Ensure the winner has an entry in the inventory
-    if winner_id not in inventory:
-        inventory[winner_id] = {"food": 0}  # Initialize inventory if missing
+async def play_connect4(ctx, member):
+    """Play Connect 4 as part of the pet battle."""
+    # Game symbols
+    PLAYER1_SYMBOL = "🔴"
+    PLAYER2_SYMBOL = "🟡"
+    EMPTY_SYMBOL = "⚪"
 
-    # Add food reward to the winner's inventory
-    inventory[winner_id]["food"] += 2
+    # Board dimensions
+    ROWS = 6
+    COLS = 7
+
+    # Initialize a blank board
+    def create_board():
+        return [[EMPTY_SYMBOL for _ in range(COLS)] for _ in range(ROWS)]
+
+    # Display the board as a string
+    def display_board(board):
+        return "\n".join("".join(row) for row in board)
+
+    # Check for a winner
+    def check_winner(board, symbol):
+        for r in range(ROWS):
+            for c in range(COLS):
+                if (
+                    c + 3 < COLS and all(board[r][c + i] == symbol for i in range(4)) or
+                    r + 3 < ROWS and all(board[r + i][c] == symbol for i in range(4)) or
+                    r + 3 < ROWS and c + 3 < COLS and all(board[r + i][c + i] == symbol for i in range(4)) or
+                    r - 3 >= 0 and c + 3 < COLS and all(board[r - i][c + i] == symbol for i in range(4))
+                ):
+                    return True
+        return False
+
+    # Drop a token into the board
+    def drop_token(board, column, symbol):
+        for row in reversed(board):
+            if row[column] == EMPTY_SYMBOL:
+                row[column] = symbol
+                return True
+        return False
+
+    players = [ctx.author, member]
+    symbols = [PLAYER1_SYMBOL, PLAYER2_SYMBOL]
+    turn = 0  # Start with player 1
+
+    # Initialize the game board
+    board = create_board()
+
+    # Send the initial game message
+    message = await ctx.send(f"🎮 **Connect 4 Battle!**\n{display_board(board)}\n🔴 {ctx.author.mention}'s turn!")
+
+    # Add reactions for column choices
+    reactions = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣"]
+    for reaction in reactions:
+        await message.add_reaction(reaction)
+
+    while True:
+        def check(reaction, user):
+            return user == players[turn] and str(reaction.emoji) in reactions and reaction.message.id == message.id
+
+        try:
+            reaction, _ = await bot.wait_for("reaction_add", timeout=60.0, check=check)
+        except asyncio.TimeoutError:
+            await ctx.send(f"⏰ {players[turn].mention} took too long! Game ended.")
+            return
+
+        column = reactions.index(str(reaction.emoji))
+
+        if drop_token(board, column, symbols[turn]):
+            if check_winner(board, symbols[turn]):
+                await message.edit(content=f"🎉 **{players[turn].mention} wins Connect 4!**\n{display_board(board)}")
+                await reward_player(players[turn])
+                return
+            elif all(row[column] != EMPTY_SYMBOL for row in board for column in range(COLS)):
+                await message.edit(content=f"🤝 It's a draw!\n{display_board(board)}")
+                return
+            else:
+                turn = 1 - turn
+                await message.edit(content=f"🎮 **Connect 4 Battle!**\n{display_board(board)}\n{symbols[turn]} {players[turn].mention}'s turn!")
+        else:
+            await ctx.send(f"❌ Column {column + 1} is full! Try a different column.")
+
+async def play_race(ctx, member):
+    """Play a pet race game as part of the pet battle."""
+    # Initialize scores
+    scores = {ctx.author.id: 0, member.id: 0}
+
+    # Create buttons
+    button1 = Button(label=f"{ctx.author.display_name}'s Pet", style=discord.ButtonStyle.primary)
+    button2 = Button(label=f"{member.display_name}'s Pet", style=discord.ButtonStyle.danger)
+
+    async def button1_callback(interaction: discord.Interaction):
+        if interaction.user.id == ctx.author.id:
+            scores[ctx.author.id] += 1
+            await interaction.response.defer()
+        else:
+            await interaction.response.send_message("This is not your button!", ephemeral=True)
+
+    async def button2_callback(interaction: discord.Interaction):
+        if interaction.user.id == member.id:
+            scores[member.id] += 1
+            await interaction.response.defer()
+        else:
+            await interaction.response.send_message("This is not your button!", ephemeral=True)
+
+    button1.callback = button1_callback
+    button2.callback = button2_callback
+
+    view = View()
+    view.add_item(button1)
+    view.add_item(button2)
+
+    # Start the race
+    message = await ctx.send(
+        f"🏁 **Pet Race!** 🏁\nTap the button as fast as you can to make your pet run faster! 🐾",
+        view=view
+    )
+
+    await asyncio.sleep(15)
+
+    # Disable buttons after the race
+    button1.disabled = True
+    button2.disabled = True
+    await message.edit(view=view)
+
+    # Determine the winner
+    if scores[ctx.author.id] > scores[member.id]:
+        await reward_player(ctx.author)
+        await ctx.send(f"🎉 **{ctx.author.display_name}**'s pet wins the race! 🏆")
+    elif scores[ctx.author.id] < scores[member.id]:
+        await reward_player(member)
+        await ctx.send(f"🎉 **{member.display_name}**'s pet wins the race! 🏆")
+    else:
+        await ctx.send("🤝 It's a draw! Both pets are equally fast!")
+
+async def reward_player(player):
+    """Reward the player with food."""
+    user_id = str(player.id)
+    inventory[user_id] = inventory.get(user_id, {"food": 0})
+    inventory[user_id]["food"] += 2
     save_inventory()
 
-    # Notify the players of the outcome
-    await ctx.send(
-        f"⚔️ **{user_pet['name']}** ({user_pet['emoji']}) battled **{opponent_pet['name']}** ({opponent_pet['emoji']})!\n"
-        f"🎉 The winner is **{winner_pet['name']}**! They earned 2 🍗 food."
-    )
 
 
 @bot.command()
