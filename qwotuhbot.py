@@ -910,8 +910,6 @@ async def pcreate(ctx, pet_type: str, rarity: str, emoji: str):
         f"- Rarity: {rarity}"
     )
 
-    )
-
 @bot.command()
 async def preroll(ctx):
     """Allow the user to reroll their pet once."""
