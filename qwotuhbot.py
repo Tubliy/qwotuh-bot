@@ -1681,7 +1681,7 @@ async def help(ctx):
         .add_field(name="!coinflip", value="Allows you to flip a coin.", inline=False),
 
         # Page 4: Pet Commands
-        discord.Embed(title="Help - Pet Commands, color=discord.Color.orange())
+        discord.Embed(title="Help - Pet Commands", color=discord.Color.orange())
         .add_field(name="!hatch", value="Hatch a pet.", inline=False),
         .add_field(name="!pstatus", value="Check your pet's status.", inline=False),
         .add_field(name="!preroll", value="Reroll pet (one time usage).", inline=False),
