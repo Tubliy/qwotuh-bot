@@ -796,34 +796,96 @@ async def pwork(ctx):
         f"Great job! They can work again in 24 hours."
     )
 
+
+def choose_pet():
+    """Randomly choose a pet."""
+    pets_list = [
+        {"type": "pig", "rarity": "Normal", "emoji": "🐷"},
+        {"type": "dog", "rarity": "Normal", "emoji": "🐕"},
+        {"type": "cat", "rarity": "Normal", "emoji": "🐈"},
+        {"type": "dragon", "rarity": "Rare", "emoji": "🐉"},
+        {"type": "cyclops", "rarity": "Rare", "emoji": "👁️"},
+        {"type": "qwotuh", "rarity": "Ultra Rare", "emoji": "✨"}
+    ]
+
+    # Weighted random selection based on rarity
+    weights = [50, 50, 50, 20, 20, 1]  # Adjust weights as needed
+    return random.choices(pets_list, weights=weights, k=1)[0]
+
 @bot.command()
-async def preroll(ctx):
-    """Reroll your pet once."""
-    user_id = str(ctx.author.id)
+@commands.has_permissions(administrator=True)
+async def pdel(ctx, member: discord.Member):
+    """Delete a pet from a user's inventory (Admin only)."""
+    user_id = str(member.id)
 
     if user_id not in pets:
-        await ctx.send("🐾 You don't have a pet to reroll! Use `!hatch` to adopt one first.")
+        await ctx.send(f"❌ {member.display_name} does not have a pet to delete.")
         return
 
-    if pets[user_id].get("rerolled", False):
-        await ctx.send("🔄 You've already used your preroll. No more rerolls allowed!")
-        return
+    # Delete the pet
+    del pets[user_id]
+    save_pets()
 
-    new_pet = choose_pet()
-    pets[user_id].update({
-        "name": new_pet["name"],
-        "type": new_pet["name"],
-        "rarity": new_pet["rarity"],
-        "emoji": new_pet["emoji"],
-        "hunger": 50,
-        "energy": 50,
-        "mood": 50,
-        "rerolled": True
-    })
+    await ctx.send(f"🗑️ The pet belonging to {member.display_name} has been deleted.")
+
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def padd(ctx, member: discord.Member, pet_type: str, rarity: str, emoji: str):
+    """Add a specific pet to a user (Admin only)."""
+    user_id = str(member.id)
+
+    # Add the pet to the user's inventory
+    pets[user_id] = {"type": pet_type, "rarity": rarity, "emoji": emoji, "name": pet_type.title(), "rerolled": False}
     save_pets()
 
     await ctx.send(
-        f"🎉 You rerolled your pet! Your old pet has been replaced with a **{new_pet['name']}** ({new_pet['rarity']} rarity) {new_pet['emoji']}."
+        f"✨ **{member.display_name}** has been given a new pet:\n"
+        f"- {emoji} **{pet_type.title()}**\n"
+        f"- Rarity: {rarity}"
+    )
+
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def pcreate(ctx, member: discord.Member, rarity: str, emoji: str, name: str):
+    """Create a custom pet with a specific rarity, emoji, and name (Admin only)."""
+    user_id = str(member.id)
+
+    # Add the custom pet to the user's inventory
+    pets[user_id] = {"type": "custom", "rarity": rarity, "emoji": emoji, "name": name, "rerolled": False}
+    save_pets()
+
+    await ctx.send(
+        f"🛠️ A custom pet has been created for **{member.display_name}**:\n"
+        f"- {emoji} **{name}**\n"
+        f"- Rarity: {rarity}"
+    )
+
+@bot.command()
+async def preroll(ctx):
+    """Allow the user to reroll their pet once."""
+    user_id = str(ctx.author.id)
+
+    if user_id not in pets:
+        await ctx.send("🐾 You don't have a pet to reroll! Use `!hatch` to adopt one.")
+        return
+
+    if pets[user_id].get("rerolled", False):
+        await ctx.send("❌ You have already used your one-time reroll!")
+        return
+
+    # Choose a new pet
+    new_pet = choose_pet()
+
+    # Update the user's pet
+    pets[user_id] = {**new_pet, "name": pets[user_id]["name"], "rerolled": True}
+    save_pets()
+
+    # Notify the user of their new pet
+    await ctx.send(
+        f"🔄 **Reroll Successful!** Your new pet is:\n"
+        f"- {new_pet['emoji']} **{new_pet['type'].title()}**\n"
+        f"- Rarity: {new_pet['rarity']}\n\n"
+        f"Give them a warm welcome!"
     )
 
 
