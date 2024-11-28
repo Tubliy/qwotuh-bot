@@ -812,69 +812,50 @@ def choose_pet():
     weights = [50, 50, 50, 20, 20, 1]  # Adjust weights as needed
     return random.choices(pets_list, weights=weights, k=1)[0]
 
+def load_available_pets():
+    """Load the available pets from a JSON file."""
+    try:
+        with open("available_pets.json", "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return []  # Start with an empty list if no file exists
+    except Exception as e:
+        print(f"Error loading available pets: {e}")
+        return []
+
+def save_available_pets(pets_list):
+    """Save the available pets to a JSON file."""
+    try:
+        with open("available_pets.json", "w") as f:
+            json.dump(pets_list, f, indent=4)
+    except Exception as e:
+        print(f"Error saving available pets: {e}")
+
+# Load available pets at bot startup
+available_pets = load_available_pets()
+
 @bot.command()
 async def plist(ctx):
-    """List all pets and their rarities."""
-    if not pets:
-        await ctx.send("🐾 No pets have been created yet.")
+    """List all currently available pets and their rarities."""
+    if not available_pets:
+        await ctx.send("🐾 No pets are available yet.")
         return
 
-    # Create a sorted list of pets with rarity
-    pet_list = [
-        f"{data['emoji']} **{data['name']}** ({data['rarity']}) - Owned by <@{user_id}>"
-        for user_id, data in pets.items()
-    ]
-    
-    # Embed-based pagination for large lists
-    pages = []
-    page_size = 10  # Number of pets per page
-    for i in range(0, len(pet_list), page_size):
-        page_content = "\n".join(pet_list[i:i + page_size])
-        embed = discord.Embed(
-            title="🐾 Pet List",
-            description=page_content,
-            color=discord.Color.blue()
-        )
-        embed.set_footer(text=f"Page {len(pages) + 1} of {((len(pet_list) - 1) // page_size) + 1}")
-        pages.append(embed)
+    # Build the embed message
+    embed = discord.Embed(
+        title="🐾 Available Pets",
+        description="Here is the list of pets you can hatch and their rarities:",
+        color=discord.Color.green()
+    )
 
-    # If only one page, send it
-    if len(pages) == 1:
-        await ctx.send(embed=pages[0])
-        return
-
-    # For multiple pages, add reactions for navigation
-    current_page = 0
-    message = await ctx.send(embed=pages[current_page])
-
-    # Add reactions for navigation
-    await message.add_reaction("⬅️")
-    await message.add_reaction("➡️")
-
-    def check(reaction, user):
-        return (
-            user == ctx.author
-            and str(reaction.emoji) in ["⬅️", "➡️"]
-            and reaction.message.id == message.id
+    for pet in available_pets:
+        embed.add_field(
+            name=f"{pet['emoji']} {pet['type'].title()}",
+            value=f"**Rarity**: {pet['rarity']}",
+            inline=True
         )
 
-    while True:
-        try:
-            reaction, _ = await bot.wait_for("reaction_add", timeout=60.0, check=check)
-
-            if str(reaction.emoji) == "➡️" and current_page < len(pages) - 1:
-                current_page += 1
-                await message.edit(embed=pages[current_page])
-            elif str(reaction.emoji) == "⬅️" and current_page > 0:
-                current_page -= 1
-                await message.edit(embed=pages[current_page])
-
-            await message.remove_reaction(reaction.emoji, ctx.author)
-        except asyncio.TimeoutError:
-            break
-
-    # Clear reactions after timeout
-    await message.clear_reactions()
+    await ctx.send(embed=embed)
 
 @bot.command()
 @commands.has_permissions(administrator=True)
@@ -910,18 +891,25 @@ async def padd(ctx, member: discord.Member, pet_type: str, rarity: str, emoji: s
 
 @bot.command()
 @commands.has_permissions(administrator=True)
-async def pcreate(ctx, member: discord.Member, rarity: str, emoji: str, name: str):
-    """Create a custom pet with a specific rarity, emoji, and name (Admin only)."""
-    user_id = str(member.id)
+async def pcreate(ctx, pet_type: str, rarity: str, emoji: str):
+    """Create a new pet and add it to the available pets list (Admin only)."""
+    # Check if the pet already exists
+    for pet in available_pets:
+        if pet["type"].lower() == pet_type.lower():
+            await ctx.send(f"❌ A pet with the type `{pet_type}` already exists.")
+            return
 
-    # Add the custom pet to the user's inventory
-    pets[user_id] = {"type": "custom", "rarity": rarity, "emoji": emoji, "name": name, "rerolled": False}
-    save_pets()
+    # Add the new pet to the list
+    new_pet = {"type": pet_type, "rarity": rarity, "emoji": emoji}
+    available_pets.append(new_pet)
+    save_available_pets(available_pets)
 
     await ctx.send(
-        f"🛠️ A custom pet has been created for **{member.display_name}**:\n"
-        f"- {emoji} **{name}**\n"
+        f"🛠️ A new pet has been added:\n"
+        f"- {emoji} **{pet_type.title()}**\n"
         f"- Rarity: {rarity}"
+    )
+
     )
 
 @bot.command()
