@@ -813,6 +813,70 @@ def choose_pet():
     return random.choices(pets_list, weights=weights, k=1)[0]
 
 @bot.command()
+async def plist(ctx):
+    """List all pets and their rarities."""
+    if not pets:
+        await ctx.send("🐾 No pets have been created yet.")
+        return
+
+    # Create a sorted list of pets with rarity
+    pet_list = [
+        f"{data['emoji']} **{data['name']}** ({data['rarity']}) - Owned by <@{user_id}>"
+        for user_id, data in pets.items()
+    ]
+    
+    # Embed-based pagination for large lists
+    pages = []
+    page_size = 10  # Number of pets per page
+    for i in range(0, len(pet_list), page_size):
+        page_content = "\n".join(pet_list[i:i + page_size])
+        embed = discord.Embed(
+            title="🐾 Pet List",
+            description=page_content,
+            color=discord.Color.blue()
+        )
+        embed.set_footer(text=f"Page {len(pages) + 1} of {((len(pet_list) - 1) // page_size) + 1}")
+        pages.append(embed)
+
+    # If only one page, send it
+    if len(pages) == 1:
+        await ctx.send(embed=pages[0])
+        return
+
+    # For multiple pages, add reactions for navigation
+    current_page = 0
+    message = await ctx.send(embed=pages[current_page])
+
+    # Add reactions for navigation
+    await message.add_reaction("⬅️")
+    await message.add_reaction("➡️")
+
+    def check(reaction, user):
+        return (
+            user == ctx.author
+            and str(reaction.emoji) in ["⬅️", "➡️"]
+            and reaction.message.id == message.id
+        )
+
+    while True:
+        try:
+            reaction, _ = await bot.wait_for("reaction_add", timeout=60.0, check=check)
+
+            if str(reaction.emoji) == "➡️" and current_page < len(pages) - 1:
+                current_page += 1
+                await message.edit(embed=pages[current_page])
+            elif str(reaction.emoji) == "⬅️" and current_page > 0:
+                current_page -= 1
+                await message.edit(embed=pages[current_page])
+
+            await message.remove_reaction(reaction.emoji, ctx.author)
+        except asyncio.TimeoutError:
+            break
+
+    # Clear reactions after timeout
+    await message.clear_reactions()
+
+@bot.command()
 @commands.has_permissions(administrator=True)
 async def pdel(ctx, member: discord.Member):
     """Delete a pet from a user's inventory (Admin only)."""
