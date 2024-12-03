@@ -24,6 +24,8 @@ import math
 import json
 from datetime import datetime, timedelta
 
+os.environ["OMP_NUM_THREADS"] = "1"
+
 logging.basicConfig(level=logging.INFO, filename='/home/tubliy/qwotuh-bot/bot.log')
 # Define intents
 intents = discord.Intents.default()
