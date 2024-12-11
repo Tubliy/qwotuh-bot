@@ -985,45 +985,54 @@ async def pleaderboard(ctx):
         await ctx.send("🐾 No pets have been adopted yet! Use `!hatch` to adopt one.")
         return
 
-    # Sort pets by total score (mood + energy + hunger)
-    sorted_pets = sorted(
-        pets.items(),
-        key=lambda x: x[1]["mood"] + x[1]["energy"] + x[1]["hunger"],  # Total score
-        reverse=True
-    )
-
-    # Create an embed to display the leaderboard
-    embed = discord.Embed(
-        title="🏆 **Pet Leaderboard** 🐾",
-        description="Top pets ranked by their total score (Mood + Energy + Hunger).",
-        color=discord.Color.gold()
-    )
-    embed.set_footer(text=f"Total Pets: {len(pets)} | Keep your pets happy and healthy!")
-
-    # Add the top pets to the leaderboard (limit to top 10)
-    for idx, (user_id, pet_data) in enumerate(sorted_pets[:10], start=1):
-        try:
-            # Fetch the owner's username
-            user = await bot.fetch_user(int(user_id))
-            username = user.name
-        except discord.NotFound:
-            username = f"Unknown User ({user_id})"
-
-        # Calculate total score
-        total_score = pet_data["mood"] + pet_data["energy"] + pet_data["hunger"]
-        pet_name = pet_data["name"]
-        pet_type = pet_data["type"]
-
-        # Add rank-specific medals
-        medal = "🥇" if idx == 1 else "🥈" if idx == 2 else "🥉" if idx == 3 else f"#{idx}"
-        embed.add_field(
-            name=f"{medal} {username}'s Pet: **{pet_name}**",
-            value=f"Type: {pet_type} | Total Score: {total_score}\nMood: {pet_data['mood']}/100 | Energy: {pet_data['energy']}/100 | Hunger: {pet_data['hunger']}/100",
-            inline=False
+    try:
+        # Sort pets by total score (mood + energy + hunger), with default values for missing keys
+        sorted_pets = sorted(
+            pets.items(),
+            key=lambda x: x[1].get("mood", 0) + x[1].get("energy", 0) + x[1].get("hunger", 0),  # Default to 0 for missing keys
+            reverse=True
         )
 
-    # Send the leaderboard embed
-    await ctx.send(embed=embed)
+        # Create an embed to display the leaderboard
+        embed = discord.Embed(
+            title="🏆 **Pet Leaderboard** 🐾",
+            description="Top pets ranked by their total score (Mood + Energy + Hunger).",
+            color=discord.Color.gold()
+        )
+        embed.set_footer(text=f"Total Pets: {len(pets)} | Keep your pets happy and healthy!")
+
+        # Add the top pets to the leaderboard (limit to top 10)
+        for idx, (user_id, pet_data) in enumerate(sorted_pets[:10], start=1):
+            try:
+                # Fetch the owner's username
+                user = await bot.fetch_user(int(user_id))
+                username = user.name
+            except discord.NotFound:
+                username = f"Unknown User ({user_id})"
+
+            # Ensure pet data has default values for missing attributes
+            mood = pet_data.get("mood", 0)
+            energy = pet_data.get("energy", 0)
+            hunger = pet_data.get("hunger", 0)
+            pet_name = pet_data.get("name", "Unknown Pet")
+            pet_type = pet_data.get("type", "Unknown Type")
+
+            # Calculate total score
+            total_score = mood + energy + hunger
+
+            # Add rank-specific medals
+            medal = "🥇" if idx == 1 else "🥈" if idx == 2 else "🥉" if idx == 3 else f"#{idx}"
+            embed.add_field(
+                name=f"{medal} {username}'s Pet: **{pet_name}**",
+                value=f"Type: {pet_type} | Total Score: {total_score}\nMood: {mood}/100 | Energy: {energy}/100 | Hunger: {hunger}/100",
+                inline=False
+            )
+
+        # Send the leaderboard embed
+        await ctx.send(embed=embed)
+    except Exception as e:
+        await ctx.send(f"An error occurred while generating the leaderboard: {e}")
+
 
 @bot.command()
 async def pstatus(ctx):
