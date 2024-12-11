@@ -975,8 +975,18 @@ async def prest(ctx):
 async def pinv(ctx):
     """Show your food inventory."""
     user_id = str(ctx.author.id)
-    food = inventory.get(user_id, {}).get("food", 0)
-    await ctx.send(f"🍗 You have **{food} food**.")
+    inventory.setdefault(user_id, {}).setdefault("food", 0)
+    food = inventory[user_id]["food"]
+
+    # Create an embed for the inventory
+    embed = discord.Embed(
+        title="🍖 **Your Inventory**",
+        description=f"You have **{food} food**.",
+        color=discord.Color.green()
+    )
+    embed.set_footer(text="Keep earning more food!")
+    await ctx.send(embed=embed)
+    save_inventory()
 
 @bot.command()
 async def pleaderboard(ctx):
@@ -1355,12 +1365,26 @@ async def reverse(ctx, *, text: str):
 notification_cooldown = {}  # Tracks cooldown for each user
 critical_count = {}  # Tracks the number of critical notifications sent
 
-@tasks.loop(minutes=30)  # Adjust the interval as needed
+@tasks.loop(minutes=30)
 async def pet_decay():
     """Applies decay to all pets, notifies users of critical conditions, and announces deaths."""
     global notification_cooldown, critical_count
 
-    for user_id, pet in pets.items():
+    # Ensure global variables are initialized
+    if "notification_cooldown" not in globals():
+        notification_cooldown = {}
+    if "critical_count" not in globals():
+        critical_count = {}
+
+    pets_to_remove = []  # Track pets to be removed after iteration
+
+    for user_id, pet in list(pets.items()):
+        # Ensure all required keys exist with default values
+        pet["hunger"] = pet.get("hunger", 100)
+        pet["energy"] = pet.get("energy", 100)
+        pet["mood"] = pet.get("mood", 100)
+        pet["name"] = pet.get("name", "Unknown Pet")
+
         # Decay stats
         pet["hunger"] = max(0, pet["hunger"] - 10)  # Hunger decreases
         pet["energy"] = max(0, pet["energy"] - 5)   # Energy decreases
@@ -1372,7 +1396,7 @@ async def pet_decay():
 
         # Check if the pet is in a critical condition
         if pet["hunger"] <= 20 or pet["mood"] <= 20 or pet["energy"] <= 20:
-            # Check cooldown before sending a notification
+            # Notify user if not on cooldown
             last_notified = notification_cooldown.get(user_id, 0)
             if last_notified < 3:  # Notify every 3 decay cycles
                 try:
@@ -1388,28 +1412,31 @@ async def pet_decay():
                     critical_count[user_id] = critical_count.get(user_id, 0) + 1
                 except discord.Forbidden:
                     pass  # User has DMs disabled
-            else:
-                notification_cooldown[user_id] = 0  # Reset cooldown if no notification sent
 
             # Check if the pet has reached the critical limit
             if critical_count.get(user_id, 0) >= 5:
-                # Announce pet's death in the general chat
+                # Queue pet for removal
+                pets_to_remove.append(user_id)
+
+                # Announce pet's death in a public channel
                 general_channel = discord.utils.get(bot.get_all_channels(), name="general")
                 if general_channel:
                     await general_channel.send(
                         f"💔 **{pet['name']}**, the pet of <@{user_id}>, has passed away due to neglect."
                     )
-                
-                # Remove the pet from the database
-                del pets[user_id]
-                save_pets()
-                
+
                 # Reset tracking for the user
                 notification_cooldown.pop(user_id, None)
                 critical_count.pop(user_id, None)
         else:
             # Reset the critical count if the pet recovers
             critical_count[user_id] = 0
+
+    # Remove pets that have died
+    for user_id in pets_to_remove:
+        del pets[user_id]
+    save_pets()
+
 
 @bot.command()
 async def socials(ctx):
