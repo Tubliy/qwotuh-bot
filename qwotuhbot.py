@@ -615,8 +615,6 @@ async def on_member_join(member):
     except discord.Forbidden:
         print(f"Could not send a DM to {member.name}.")
 
-import json
-import random
 
 PET_FILE = "pets.json"
 INVENTORY_FILE = "inventory.json"
