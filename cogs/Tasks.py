@@ -38,7 +38,7 @@ class Tasks(commands.Cog):
         tubliy_user_id = 400402306836856833
         qwotuh_user_id = 795417945105891352
         
-        if message.author.id != qwotuh_user_id or tubliy_user_id:
+        if message.author.id not in (qwotuh_user_id, tubliy_user_id):
             return
         
         if "LIVE" not in message.content.upper():
