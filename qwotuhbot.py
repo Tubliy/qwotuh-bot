@@ -14,6 +14,7 @@ class Main(commands.Bot):
      
      self.owner = 400402306836856833
      self.moderation = None
+     self.tasks = None
      
     
      
@@ -31,6 +32,9 @@ class Main(commands.Bot):
       
         if self.moderation:
             await self.moderation.check_message(message)
+            
+        if self.tasks:
+            await self.tasks.check_live_message(message)
                 
         await self.process_commands(message)
         
