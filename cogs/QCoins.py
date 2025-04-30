@@ -13,7 +13,7 @@ class QCoins(commands.Cog):
         self.data = self.loadqcoins()
         self.coin_emoji = "<:qcoin:1367163106282963066>"
         self.random_amount = [0.5, 1.5, 1, 2, 2.24, 3.45, 5, 5.7, 10]
-        self.dailycoins_cooldown = {}
+        self.dailycoins_cooldowns = {}
         
         self.error_embed = discord.Embed(title="Bank💲", description="Error: Not able to proceed with action", color=
         discord.Color.red())
