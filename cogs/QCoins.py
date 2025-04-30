@@ -41,7 +41,7 @@ class QCoins(commands.Cog):
         
         coin_embed = discord.Embed(title="Bank💲", description=f"You have a total of {coins} {self.coin_emoji}", color=
         discord.Color.green())
-        coin_embed.set_footer(text=f"{ctx.author.metion},  {date_string}")
+        coin_embed.set_footer(text=f"{ctx.author.mention},  {date_string}")
         
         await ctx.send(embed=coin_embed)
         
