@@ -32,7 +32,7 @@ class Tasks(commands.Cog):
         
         
     async def check_live_message(self,message):
-        if message.author == self.user:
+        if message.author.bot:
             return
         
         tubliy_user_id = 400402306836856833
