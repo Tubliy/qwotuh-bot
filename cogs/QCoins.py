@@ -34,7 +34,7 @@ class QCoins(commands.Cog):
         self.saveqcoins()
         
     @commands.command()
-    async def coins(self,ctx, member : discord.Member):
+    async def coins(self,ctx, member : discord.Member = None):
         member = member or ctx.author
         coins = self.get_balance(member.id)
         now = datetime.now()
@@ -42,7 +42,7 @@ class QCoins(commands.Cog):
         
         coin_embed = discord.Embed(title="Bank💲", description=f"{member.mention} has a total of {coins} {self.coin_emoji}", color=
         discord.Color.green())
-        coin_embed.set_footer(text=f"{ctx.author.display_name},  {date_string}")
+        coin_embed.set_footer(text=f"Requested by {ctx.author.display_name},  {date_string}")
         
         await ctx.send(embed=coin_embed)
         
