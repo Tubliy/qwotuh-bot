@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands, tasks
+from datetime import datetime
 
 class Tasks(commands.Cog):
     def __init__(self, bot):
@@ -37,6 +38,9 @@ class Tasks(commands.Cog):
         
         tubliy_user_id = 400402306836856833
         qwotuh_user_id = 795417945105891352
+        now = datetime.now()
+        date_string = now.strftime("%B %d, %Y")  # Example: April 30, 2025
+
         
         if message.author.id not in (qwotuh_user_id, tubliy_user_id):
             return
@@ -51,13 +55,14 @@ class Tasks(commands.Cog):
             print("Announcement channel not found.")
             return
         
-        live_message = ("🔴 **Qwotuh** is now live on tiktok. \n"
-        "tiktok.com/qwotuh")
+        live_message = ("🟢 **Qwotuh** is now live on tiktok. @everyone\n"
+        "https://tiktok.com/@qwotuh\n")
         
         file = discord.File("images/qwotuh.gif",filename="qwotuh.gif")
         
         live_embed = discord.Embed(description=live_message, color=discord.Color.green())
         live_embed.set_image(url="attachment://qwotuh.gif")
+        live_embed.set_footer(text=f"Live posted on {date_string}")
         
         try:
                 await message.delete()
