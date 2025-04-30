@@ -2,7 +2,8 @@ import discord
 from discord.ext import commands
 import json
 import os
-from datetime import datetime
+import time
+from datetime import datetime, timedelta
 import random
 
 class QCoins(commands.Cog):
@@ -11,7 +12,8 @@ class QCoins(commands.Cog):
         self.file = 'qcoins.json'
         self.data = self.loadqcoins()
         self.coin_emoji = "<:qcoin:1367163106282963066>"
-
+        self.random_amount = [0.5, 1.5, 1, 2, 2.24, 3.45, 5, 5.7, 10]
+        self.dailycoins_cooldown = {}
         
         self.error_embed = discord.Embed(title="Bank💲", description="Error: Not able to proceed with action", color=
         discord.Color.red())
@@ -102,7 +104,6 @@ class QCoins(commands.Cog):
     async def gamble(self,ctx,amount : int):
         user_id = str(ctx.author.id)
         
-        random_amount = [0.5, 1.5, 1, 2, 2.24, 3.45, 5, 5.7, 10]
         
         if amount <= 0:
             try:
@@ -113,7 +114,7 @@ class QCoins(commands.Cog):
             return
         
         balance = self.get_balance(user_id)
-        gamble_amount = round(amount * random.choice(random_amount))
+        gamble_amount = round(amount * random.choice(self.random_amount))
         
         success_gamble = discord.Embed(title="Bank💲", description=f"{ctx.author.mention}, you have won {gamble_amount} {self.coin_emoji} 🎰!", color=
         discord.Color.green())
@@ -173,6 +174,36 @@ class QCoins(commands.Cog):
             discord.Color.gold())
 
         embed.set_footer(text="Admin command")
+        await ctx.send(embed=embed)
+        
+    @commands.command()
+    async def daily(self,ctx):
+        now = time.time()
+        cooldown = 86400
+        user_id = ctx.author.id
+        
+        last_used = self.dailycoins_cooldowns.get(user_id,0)
+        remaining = int(cooldown - (now - last_used))
+        
+        balance = self.get_balance(user_id)
+        daily_amount = round(balance *random.choice(self.random_amount))
+        
+        if remaining > 0:
+            hours = remaining // 3600
+            minutes = (remaining % 3600) // 60
+            seconds = remaining % 60
+            await ctx.send(embed=self.error_embed)
+            await ctx.author.send(
+            f"⏳ You need to wait **{hours}h {minutes}m {seconds}s** before using this again."
+             )
+            return
+        
+        self.add_qcoins(user_id,daily_amount)
+        self.dailycoins_cooldown[user_id] = now
+        
+        embed = discord.Embed(title="Bank💲", description=f"You have been given your daily {daily_amount} {self.coin_emoji}", color=
+         discord.Color.green())
+        
         await ctx.send(embed=embed)
 
 async def setup(bot):
