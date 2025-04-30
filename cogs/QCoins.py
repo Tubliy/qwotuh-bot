@@ -41,7 +41,7 @@ class QCoins(commands.Cog):
         
         coin_embed = discord.Embed(title="Bank💲", description=f"You have a total of {coins} {self.coin_emoji}", color=
         discord.Color.green())
-        coin_embed.set_footer(text=f"{ctx.author.id},  {date_string}")
+        coin_embed.set_footer(text=f"{ctx.author.metion},  {date_string}")
         
         await ctx.send(embed=coin_embed)
         
@@ -57,7 +57,7 @@ class QCoins(commands.Cog):
         
         if amount <= 0:
             try:
-                await ctx.send(embed=error_embed)
+                await ctx.send(embed=self.error_embed)
                 await ctx.author.send("Invalid number of coins, please enter a positive value.")
             except discord.Forbidden:
                 ctx.send(f"{ctx.author.mention}, I'm unable to DM you please change your privacy settings.")
@@ -82,7 +82,7 @@ class QCoins(commands.Cog):
         if message.author.bot:
             return
         
-        self.add_qcoins(message.author.id, 100)
+        self.add_qcoins(message.author.id, 10)
         
         
     @commands.command()
@@ -121,7 +121,26 @@ class QCoins(commands.Cog):
             self.add_qcoins(user_id, -amount)
             await ctx.send(embed=failed_gamble)
         
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def qset(self,ctx, member: discord.Member, amount : int):
         
+        
+                                    
+        if amount <= 0:
+            ctx.send(embed=self.error_embed)
+            return
+        
+        reciever = str(member.id)
+        self.data[reciever] = amount
+        self.saveqcoins()
+        
+        
+        admin_embed = discord.Embed(title="Bank💲", description=f"You sucessfully set {member.mention}'s coins to {amount} {self.coin_emoji}", color=discord.Color.dark_blue)
+        admin_embed.set_footer(text="Admin command")
+        
+        
+        await ctx.send(embed=admin_embed)
         
     
 
