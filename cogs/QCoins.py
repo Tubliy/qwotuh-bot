@@ -199,7 +199,7 @@ class QCoins(commands.Cog):
             return
         
         self.add_qcoins(user_id,daily_amount)
-        self.dailycoins_cooldown[user_id] = now
+        self.dailycoins_cooldowns[user_id] = now
         
         embed = discord.Embed(title="Bank💲", description=f"You have been given your daily {daily_amount} {self.coin_emoji}", color=
          discord.Color.green())
