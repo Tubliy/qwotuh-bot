@@ -15,6 +15,7 @@ class Main(commands.Bot):
      self.owner = 400402306836856833
      self.moderation = None
      self.tasks = None
+     self.qcoins = None
      
     
      
@@ -35,6 +36,9 @@ class Main(commands.Bot):
             
         if self.tasks:
             await self.tasks.check_live_message(message)
+            
+        if self.qcoins:
+            await self.qcoins.collect_coins(message)
                 
         await self.process_commands(message)
         
