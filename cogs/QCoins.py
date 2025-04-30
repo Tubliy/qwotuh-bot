@@ -57,7 +57,7 @@ class QCoins(commands.Cog):
              await ctx.author.send(f"{ctx.author.mention}, you can't give Q Coins to yourself.")
             except discord.Forbidden:
                 await ctx.send(f"{ctx.author.mention}, I'm unable to DM you. Please change your privacy settings.")
-                return
+            return
             
 
         if amount <= 0:
@@ -66,7 +66,7 @@ class QCoins(commands.Cog):
               await ctx.author.send("Invalid number of coins, please enter a positive value.")
           except discord.Forbidden:
                 await ctx.send(f"{ctx.author.mention}, I'm unable to DM you. Please change your privacy settings.")
-                return
+          return
 
         if self.get_balance(giver) < amount:
          try:
@@ -74,16 +74,16 @@ class QCoins(commands.Cog):
              await ctx.author.send("You don't have sufficient coins to send that amount.")
          except discord.Forbidden:
              await ctx.send(f"{ctx.author.mention}, I'm unable to DM you. Please change your privacy settings.")
-             return
+         return
 
         self.add_qcoins(giver, -amount)
         self.add_qcoins(receiver, amount)
 
         sent_embed = discord.Embed(
-         title="Bank💲",
-            description=f"{ctx.author.mention}, you have given {amount} {self.coin_emoji} to {member.mention}",
-            color=discord.Color.green()
-        )
+          title="Bank💲",
+             description=f"{ctx.author.mention}, you have given {amount} {self.coin_emoji} to {member.mention}",
+                color=discord.Color.green()
+            )
 
         await ctx.send(embed=sent_embed)
 
