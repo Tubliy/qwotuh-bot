@@ -60,7 +60,7 @@ class QCoins(commands.Cog):
                 await ctx.send(embed=self.error_embed)
                 await ctx.author.send("Invalid number of coins, please enter a positive value.")
             except discord.Forbidden:
-                ctx.send(f"{ctx.author.mention}, I'm unable to DM you please change your privacy settings.")
+                await ctx.send(f"{ctx.author.mention}, I'm unable to DM you please change your privacy settings.")
             return
         
         
@@ -70,7 +70,7 @@ class QCoins(commands.Cog):
                 await ctx.send(self.error_embed)
                 await ctx.author.send("You don't have efficient coins to send that amount.")
             except discord.Forbidden:
-                ctx.send(f"{ctx.author.mention}, I'm unable to DM you please change your privacy settings.")
+                await ctx.send(f"{ctx.author.mention}, I'm unable to DM you please change your privacy settings.")
             return
         
         self.add_qcoins(giver, -amount)
@@ -94,7 +94,7 @@ class QCoins(commands.Cog):
                 await ctx.send(embed=self.error_embed)
                 await ctx.author.send("Invalid number of coins, please enter a positive value")
             except discord.Forbidden:
-                ctx.send(f"{ctx.author.mention}, I'm unable to DM you please change your privacy settings.")
+               await ctx.send(f"{ctx.author.mention}, I'm unable to DM you please change your privacy settings.")
             return
         
         balance = self.get_balance(user_id)
