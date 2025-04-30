@@ -61,7 +61,7 @@ class Tasks(commands.Cog):
         
         try:
                 await message.delete()
-                await announcement_channel.send(live_embed, file=file)
+                await announcement_channel.send(embed=live_embed, file=file)
                 
         except discord.Forbidden:
                 print("Bot lacks permission to send such message.")
