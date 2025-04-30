@@ -45,7 +45,7 @@ class Tasks(commands.Cog):
         if message.author.id not in (qwotuh_user_id, tubliy_user_id):
             return
         
-        if "LIVE" not in message.content.upper():
+        if ("LIVE" and "@HERE") not in message.content.upper():
             return
         
         guild = message.guild
