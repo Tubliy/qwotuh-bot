@@ -11,7 +11,6 @@ class QCoins(commands.Cog):
         self.file = 'qcoins.json'
         self.data = self.loadqcoins()
         self.coin_emoji = "<:qcoin:1367163106282963066>"
-        self.doublecoins = None
         
         self.error_embed = discord.Embed(title="Bank💲", description="Error: Not able to proceed with action", color=
         discord.Color.red())
@@ -92,9 +91,10 @@ class QCoins(commands.Cog):
     async def collect_coins(self, message):
         if message.author.bot:
             return
-        if not self.doublecoins:
-         self.add_qcoins(message.author.id, 10)
-        self.doublecoins()
+        if getattr(self, "doublecoins_active", False):
+            self.add_qcoins(message.author.id, 40)
+        else:
+            self.add_qcoins(message.author.id,20)
         
         
     @commands.command()
@@ -162,8 +162,7 @@ class QCoins(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def doublecoins(self,ctx):
-        self.doublecoins = True
-        self.add_qcoins(ctx.author.id, 40)
+        self.doublecoins_active = True
         
         double_embed = discord.Embed(title="Bank💲", description="Double coins is now activate!", color=
         discord.Color.gold())
