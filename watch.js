@@ -1,10 +1,11 @@
 // watch.js
 
-const { TikTokLiveConnection } = require('tiktok-live-connector');
+const TikTokLiveConnection = require('tiktok-live-connector');
+
 const axios = require('axios');
 
 // 🔧 Change this to your friend's TikTok username (no @)
-const username = "yourfriendstiktokname";
+const username = "qwotuh";
 
 // 🔧 This is where your Python bot will be listening
 const discordBotEndpoint = "http://localhost:5000/tiktok-live";
