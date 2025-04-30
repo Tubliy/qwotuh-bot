@@ -110,7 +110,7 @@ class QCoins(commands.Cog):
             return
         
         balance = self.get_balance(user_id)
-        gamble_amount = amount * random.choice(random_amount)
+        gamble_amount = round(amount * random.choice(random_amount))
         
         success_gamble = discord.Embed(title="Bank💲", description=f"{ctx.author.mention}, you have won {gamble_amount} {self.coin_emoji} 🎰!", color=
         discord.Color.green())
