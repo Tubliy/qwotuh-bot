@@ -99,6 +99,8 @@ class QCoins(commands.Cog):
     async def gamble(self,ctx,amount : int):
         user_id = str(ctx.author.id)
         
+        random_amount = [0.5, 1.5, 1, 2, 2.24, 3.45, 5, 5.7, 10]
+        
         if amount <= 0:
             try:
                 await ctx.send(embed=self.error_embed)
@@ -108,7 +110,7 @@ class QCoins(commands.Cog):
             return
         
         balance = self.get_balance(user_id)
-        gamble_amount = amount * 3.5
+        gamble_amount = amount * random.choice(random_amount)
         
         success_gamble = discord.Embed(title="Bank💲", description=f"{ctx.author.mention}, you have won {gamble_amount} {self.coin_emoji} 🎰!", color=
         discord.Color.green())
