@@ -34,14 +34,15 @@ class QCoins(commands.Cog):
         self.saveqcoins()
         
     @commands.command()
-    async def coins(self,ctx):
-        coins = self.get_balance(ctx.author.id)
+    async def coins(self,ctx, member : discord.Member):
+        member = member or ctx.author
+        coins = self.get_balance(member.id)
         now = datetime.now()
         date_string = now.strftime("%B %d, %Y")
         
-        coin_embed = discord.Embed(title="Bank💲", description=f"You have a total of {coins} {self.coin_emoji}", color=
+        coin_embed = discord.Embed(title="Bank💲", description=f"{member.mention} has a total of {coins} {self.coin_emoji}", color=
         discord.Color.green())
-        coin_embed.set_footer(text=f"{ctx.author.mention},  {date_string}")
+        coin_embed.set_footer(text=f"{ctx.author.display_name},  {date_string}")
         
         await ctx.send(embed=coin_embed)
         
@@ -145,11 +146,15 @@ class QCoins(commands.Cog):
         self.saveqcoins()
         
         
-        admin_embed = discord.Embed(title="Bank💲", description=f"You sucessfully set {member.mention}'s coins to {amount} {self.coin_emoji}", color=discord.Color.gold)
-        admin_embed.set_footer(text="Admin command")
+        embed = discord.Embed(
+        title="✅ Coins Set",
+        description=f"{member.mention} now has **{amount}** {self.coin_emoji}",
+        color=discord.Color.green()
+            )
+        embed.set_footer(text="Admin command")
+        await ctx.send(embed=embed)
+
         
-        
-        await ctx.send(embed=admin_embed)
         
     
 
