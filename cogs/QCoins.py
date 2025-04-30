@@ -145,7 +145,7 @@ class QCoins(commands.Cog):
         self.saveqcoins()
         
         
-        admin_embed = discord.Embed(title="Bank💲", description=f"You sucessfully set {member.mention}'s coins to {amount} {self.coin_emoji}", color=discord.Color.dark_blue)
+        admin_embed = discord.Embed(title="Bank💲", description=f"You sucessfully set {member.mention}'s coins to {amount} {self.coin_emoji}", color=discord.Color.gold)
         admin_embed.set_footer(text="Admin command")
         
         
