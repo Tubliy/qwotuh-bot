@@ -268,20 +268,20 @@ class QCoins(commands.Cog):
            await ctx.send(f"You need {roleprice} {self.coin_emoji} to buy {rolename}, but you only have {user_balance}.")
            return
        
+       if prestige == 10:
+                await ctx.author.add_roles("Master Prestige")
+                rolename = "Master Prestige"
+                return
+       
        role = discord.utils.get(ctx.guild.roles, name=rolename)
         
        if not role:
-            ctx.send("That prestige doesn't exist")
+            await ctx.send("That prestige doesn't exist")
             return
         
        try:
             await ctx.author.add_roles(role)
             self.add_qcoins(user_id, -roleprice)
-            
-            if prestige == 10:
-                await ctx.author.add_roles("Master Prestige")
-                rolename = "Master Prestige"
-                return
             
             embed = discord.Embed(
              title="🛒 Purchase Complete",
