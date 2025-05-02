@@ -278,6 +278,11 @@ class QCoins(commands.Cog):
             await ctx.author.add_roles(role)
             self.add_qcoins(user_id, -roleprice)
             
+            if prestige == 10:
+                await ctx.author.add_roles("Master Prestige")
+                rolename = "Master Prestige"
+                return
+            
             embed = discord.Embed(
              title="🛒 Purchase Complete",
              description=f"You have purchased **{rolename}** for {roleprice} {self.coin_emoji}!",
