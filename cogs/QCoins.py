@@ -260,7 +260,6 @@ class QCoins(commands.Cog):
            await ctx.send("Please enter a valid number between 1 and 10.")
            return
        
-       rolename = f"Prestige {prestige}"
        roleprice = prestige_role_price * prestige
        user_balance = self.get_balance(user_id)
        
@@ -269,12 +268,16 @@ class QCoins(commands.Cog):
            return
        
        if prestige == 10:
-                await ctx.author.add_roles("Master Prestige")
-                rolename = "Master Prestige"
-                return
+            rolename = "Master Prestige"
+       else:
+           rolename=f"Prestige {prestige}"
        
        role = discord.utils.get(ctx.guild.roles, name=rolename)
         
+       if role in ctx.author.roles:
+           ctx.send("You already have this prestige.")
+           return
+       
        if not role:
             await ctx.send("That prestige doesn't exist")
             return
