@@ -229,9 +229,9 @@ class QCoins(commands.Cog):
                 break
             
         if count == 0:
-            ctx.send("No users with QCoins found.")
+            await ctx.send("No users with QCoins found.")
             
-        ctx.send(embed=embed)
+        await ctx.send(embed=embed)
 
 
 async def setup(bot):
