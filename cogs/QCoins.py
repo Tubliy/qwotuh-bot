@@ -205,6 +205,34 @@ class QCoins(commands.Cog):
          discord.Color.green())
         
         await ctx.send(embed=embed)
+        
+        
+    @commands.command()
+    async def leaderboard(self, ctx, top: int = 10):
+
+        sorted_users = sorted(self.data.items(), key = lambda x:x[1], reverse=True)
+        
+        embed = discord.Embed(title=f"🏆 Q Coin Leaderboard (Top {top}",
+        color=discord.Color.gold())
+        
+        count = 0
+        
+        for user_id, balance in sorted_users:
+            member = ctx.guild.get_member(int(user_id))
+            if member:
+                count += 1
+                embed.add_field(name=f"{count}. {member.display_name}",
+                                value = f"{balance} {self.coin_emoji}",
+                                inline=False)
+                
+            if count >= top:
+                break
+            
+        if count == 0:
+            ctx.send("No users with QCoins found.")
+            
+        ctx.send(embed=embed)
+
 
 async def setup(bot):
     cog = QCoins(bot)
