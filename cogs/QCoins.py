@@ -124,7 +124,7 @@ class QCoins(commands.Cog):
         
         if balance < amount:
             try:
-                await ctx.send(self.error_embed)
+                await ctx.send(embed=self.error_embed)
                 await ctx.author.send("You don't have sufficient coins to gamble that amount.")
             except discord.Forbidden:
                await ctx.send(f"{ctx.author.mention}, I'm unable to DM you please change your privacy settings.")
