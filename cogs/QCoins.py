@@ -127,7 +127,7 @@ class QCoins(commands.Cog):
                 await ctx.send(self.error_embed)
                 await ctx.author.send("You don't have sufficient coins to gamble that amount.")
             except discord.Forbidden:
-                ctx.send(f"{ctx.author.mention}, I'm unable to DM you please change your privacy settings.")
+               await ctx.send(f"{ctx.author.mention}, I'm unable to DM you please change your privacy settings.")
             return
         
         if random.choice([True,False]):
@@ -248,6 +248,7 @@ class QCoins(commands.Cog):
             inline=False)
             
         embed.set_footer(text="Purchase items with Q coins!")
+        await ctx.send(embed=embed)
         
     @commands.command()
     async def buy(self, ctx, prestige : int):
