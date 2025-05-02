@@ -247,7 +247,7 @@ class QCoins(commands.Cog):
             value=f"{price * i} {self.coin_emoji}",
             inline=False)
             
-        embed.set_footer("Purchase items with Q coins!")
+        embed.set_footer(text="Purchase items with Q coins!")
         
     @commands.command()
     async def buy(self, ctx, prestige : int):
