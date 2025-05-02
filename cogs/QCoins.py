@@ -275,7 +275,7 @@ class QCoins(commands.Cog):
        role = discord.utils.get(ctx.guild.roles, name=rolename)
         
        if role in ctx.author.roles:
-           ctx.send("You already have this prestige.")
+           await ctx.send("You already have this prestige.")
            return
        
        if not role:
