@@ -208,11 +208,11 @@ class QCoins(commands.Cog):
         
         
     @commands.command()
-    async def leaderboard(self, ctx, top: int = 10):
+    async def leaderboard(self, ctx, top: int = 5):
 
         sorted_users = sorted(self.data.items(), key = lambda x:x[1], reverse=True)
         
-        embed = discord.Embed(title=f"🏆 Q Coin Leaderboard (Top {top}",
+        embed = discord.Embed(title=f"🏆 Q Coin Leaderboard (Top {top})",
         color=discord.Color.gold())
         
         count = 0
@@ -231,7 +231,61 @@ class QCoins(commands.Cog):
         if count == 0:
             await ctx.send("No users with QCoins found.")
             
+        embed.set_footer(text="Get to the top, to purchase perstiges and earn prizes!")
         await ctx.send(embed=embed)
+        
+    @commands.command()
+    async def shop(self, ctx):
+        
+        embed = discord.Embed(title=f" {self.coin_emoji} Q Coin Shop",
+        color=discord.Color.green())
+        
+        price = 100000
+        
+        for i in range(1,11):
+            embed.add_field(name=f"Prestige {i}:",
+            value=f"{price * i} {self.coin_emoji}",
+            inline=False)
+            
+        embed.set_footer("Purchase items with Q coins!")
+        
+    @commands.command()
+    async def buy(self, ctx, prestige : int):
+        
+       user_id = str(ctx.author.id)
+       prestige_role_price = 100000
+       
+       if prestige < 1 or prestige > 10:
+           await ctx.send("Please enter a valid number between 1 and 10.")
+           return
+       
+       rolename = f"Prestige {prestige}"
+       roleprice = prestige_role_price * prestige
+       user_balance = self.get_balance(user_id)
+       
+       if user_balance < roleprice:
+           await ctx.send(f"You need {roleprice} {self.coin_emoji} to buy {rolename}, but you only have {user_balance}.")
+           return
+       
+       role = discord.utils.get(ctx.guild.roles, name=rolename)
+        
+       if not role:
+            ctx.send("That prestige doesn't exist")
+            return
+        
+       try:
+            await ctx.author.add_roles(role)
+            self.add_qcoins(user_id, -roleprice)
+            
+            embed = discord.Embed(
+             title="🛒 Purchase Complete",
+             description=f"You have purchased **{rolename}** for {roleprice} {self.coin_emoji}!",
+                color = discord.Color.green()
+            )
+            await ctx.send(embed=embed)
+       except discord.Forbidden:
+            await ctx.send("I don't have the current permissions to assign that role.")
+        
 
 
 async def setup(bot):
