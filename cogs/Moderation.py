@@ -10,11 +10,11 @@ class Moderation(commands.Cog):
     def __init__(self,bot):
         self.bot = bot
         self.bad_words = self.load_bad_words()
+        self.fileName_badword = "badwordwarnings.json"
+        self.fileName_spam = "spamwarnings.json"
         self.bad_words_warnings = self.load_badwordwarnings()
         self.spam_warnings = self.load_spamwarnings()
         self.messagelog = {}
-        self.fileName_badword = "badwordwarnings.json"
-        self.fileName_spam = "spamwarnings.json"
         
         
         self.time_window = 5
@@ -31,7 +31,7 @@ class Moderation(commands.Cog):
         if os.path.exists(self.fileName_spam):
             with open(self.fileName_spam, "r") as f:
                 return json.load(f)
-            return {}
+        return {}
         
     def save_badwordwarnings(self):
         with open(self.fileName_badword, "w") as f:
