@@ -3,14 +3,18 @@ from discord.ext import commands
 import time
 import asyncio
 import re
+import json
+import os
 
 class Moderation(commands.Cog):
     def __init__(self,bot):
         self.bot = bot
         self.bad_words = self.load_bad_words()
-        self.bad_words_warnings = {}
-        self.spam_warnings = {}
+        self.bad_words_warnings = self.load_badwordwarnings()
+        self.spam_warnings = self.load_spamwarnings()
         self.messagelog = {}
+        self.fileName_badword = "badwordwarnings.json"
+        self.fileName_spam = "spamwarnings.json"
         
         
         self.time_window = 5
@@ -19,6 +23,25 @@ class Moderation(commands.Cog):
         
         self.log_channel = 1365098636064591944
         
+    def save_spamwarnings(self):
+        with open(self.fileName_spam,"w") as f:
+            json.dump(self.spam_warnings, f)
+    
+    def load_spamwarnings(self):
+        if os.path.exists(self.fileName_spam):
+            with open(self.fileName_spam, "r") as f:
+                return json.load(f)
+            return {}
+        
+    def save_badwordwarnings(self):
+        with open(self.fileName_badword, "w") as f:
+            json.dump(self.bad_words_warnings, f)
+    
+    def load_badwordwarnings(self):
+        if os.path.exists(self.fileName_badword):
+            with open(self.fileName_badword, "r") as f:
+                return json.load(f)
+        return {}
         
     @commands.command(name="clear")
     @commands.has_permissions(administrator=True)
@@ -68,6 +91,8 @@ class Moderation(commands.Cog):
             # ⚠️ Increment warning count
             self.spam_warnings[user_id] = self.spam_warnings.get(user_id, 0) + 1
             warning_count = self.spam_warnings[user_id]
+            
+            self.save_spamwarnings()
 
             log_channel = self.bot.get_channel(self.log_channel)
 
@@ -85,6 +110,7 @@ class Moderation(commands.Cog):
                 pass
 
             self.messagelog[user_id] = []  # Reset counter
+            
             self.last_spam_trigger[user_id] = now  # Start cooldown
 
             # ⛔ Mute after 3 warnings
@@ -94,6 +120,8 @@ class Moderation(commands.Cog):
                     await log_channel.send(f"{message.author.mention} has been muted for: {reason}")
                 await self.mute(member=message.author, reason=reason, duration=600)  # 10 minutes
                 self.spam_warnings[user_id] = 0  # Reset warnings after mute
+                
+                self.save_spamwarnings()
     
     async def mute(self, member : discord.Member, reason = "Spamming", duration: int = 600):
         guild = member.guild
@@ -142,6 +170,7 @@ class Moderation(commands.Cog):
             
             
             self.bad_words_warnings[user_id] = self.bad_words_warnings.get(user_id, 0) + 1
+            self.save_badwordwarnings()
             
             warning_count = self.bad_words_warnings[user_id]
             log_channel = self.bot.get_channel(self.log_channel)
