@@ -16,8 +16,8 @@ class QCoins(commands.Cog):
         self.random_amount = [1000, 2000, 2500, 3000, 3500, 4000, 5000, 6000]
         self.random_multiplier = [1.5, 2, 2.5, 3, 3.5, 4, 4.5,5 , 5.5]
         self.dailycoins_cooldowns = {}
-        self.imageFile = File("images/qwotuh.gif", filename="qwotuh.gif")
-        
+        self.image_path = "images/qwotuh.gif"
+        self.image_filename = "qwotuh.gif"
         self.error_embed = discord.Embed(title="Bank💲", description="Error: Not able to proceed with action", color=
         discord.Color.red())
         
@@ -48,10 +48,13 @@ class QCoins(commands.Cog):
         
         coin_embed = discord.Embed(title="Bank💲", description=f"{member.mention} has a total of {coins} {self.coin_emoji}", color=
         discord.Color.green())
-        coin_embed.set_image(url="attachment://qwotuh.gif")
         coin_embed.set_footer(text=f"Requested by {ctx.author.display_name},  {date_string}")
         
-        await ctx.send(embed=coin_embed, file=self.imageFile)
+        with open(self.image_path, "rb") as f:
+            file = discord.File(f, filename=self.image_filename)
+            coin_embed.set_image(url=f"attachment://{self.image_filename}")
+        
+        await ctx.send(embed=coin_embed, file=file)
         
     @commands.command()
     async def qgive(self, ctx, member: discord.Member, amount: int):
