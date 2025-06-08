@@ -16,7 +16,7 @@ class QCoins(commands.Cog):
         self.random_amount = [1000, 2000, 2500, 3000, 3500, 4000, 5000, 6000]
         self.random_multiplier = [1.5, 2, 2.5, 3, 3.5, 4, 4.5,5 , 5.5]
         self.dailycoins_cooldowns = {}
-        self.imageFile = File("qwotuh.gif", filename="qwotuh.gif")
+        self.imageFile = File("images/qwotuh.gif", filename="qwotuh.gif")
         
         self.error_embed = discord.Embed(title="Bank💲", description="Error: Not able to proceed with action", color=
         discord.Color.red())
