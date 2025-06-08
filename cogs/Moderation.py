@@ -67,6 +67,7 @@ class Moderation(commands.Cog):
     async def setwarnings(self, ctx, member : discord.Member = None, type: str = None, amount: int = 0):
         member = member or ctx.author
         user_id = str(member.id)
+        author = ctx.author.display_name
         
         if amount < 0:
             await ctx.send("⚠ The number has to be a positive number.")
@@ -79,16 +80,21 @@ class Moderation(commands.Cog):
         embed = discord.Embed(title=f"Set warnings for {member.display_name}."
         , color=discord.Color.blue())
         embed.set_footer(text="Admin Command.")
+        
+        log_channel = self.bot.get_channel(self.log_channel)
+        
     
         try:
           if type == "spam":
               self.spam_warnings[user_id] = amount
               self.save_spamwarnings()
               embed.add_field(name="Spam Warning:", value=amount)
+              await log_channel.send(f"{member.display_name}, spam warnings has been set to {amount} by `{author}`")
           elif type == "badwords":
               self.bad_words_warnings[user_id] = amount
               self.save_badwordwarnings()
               embed.add_field(name="Bad Word warning:", value=amount)
+              await log_channel.send(f"{member.display_name}, bad word warnings has been set to {amount} by `{author}`")
         except Exception:
            await ctx.send("Invalid type.")
             
