@@ -185,8 +185,7 @@ class QCoins(commands.Cog):
         last_used = self.dailycoins_cooldowns.get(user_id,0)
         remaining = int(cooldown - (now - last_used))
         
-        balance = self.get_balance(user_id)
-        daily_amount = round(balance *random.choice(self.random_amount))
+        daily_amount = round(random.choice(self.random_amount))
         
         if remaining > 0:
             hours = remaining // 3600
