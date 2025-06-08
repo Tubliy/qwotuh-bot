@@ -70,7 +70,9 @@ class Moderation(commands.Cog):
             print("badwords.txt file not found!")
             return []
         
-    async def spam_check(self, message, user_id):
+    async def spam_check(self, message):
+        
+        user_id = str(message.author.id)
         now = time.time()
         cooldown = 15  # seconds of cooldown after a warning
 
@@ -157,13 +159,13 @@ class Moderation(commands.Cog):
         if message.author.bot:
             return
         
-        user_id = message.author.id
+        user_id = str(message.author.id)
         message_content = message.content.lower()
         bad_word_used = next((word for word in self.bad_words if re.search(rf"\b{re.escape(word)}\b", message_content)), None
                              
         )
 
-        await self.spam_check(message, user_id)
+        await self.spam_check(message)
         
         if bad_word_used:
             await message.delete()
