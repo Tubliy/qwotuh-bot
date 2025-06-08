@@ -25,7 +25,7 @@ class Moderation(commands.Cog):
         
     def save_spamwarnings(self):
         with open(self.fileName_spam,"w") as f:
-            json.dump(self.spam_warnings, f)
+            json.dump({str(k): v for k,v in self.spam_warnings.items()}, f)
     
     def load_spamwarnings(self):
         if os.path.exists(self.fileName_spam):
@@ -35,7 +35,7 @@ class Moderation(commands.Cog):
         
     def save_badwordwarnings(self):
         with open(self.fileName_badword, "w") as f:
-            json.dump(self.bad_words_warnings, f)
+            json.dump({str(k): v for k,v in self.bad_words_warnings.items()}, f)
     
     def load_badwordwarnings(self):
         if os.path.exists(self.fileName_badword):
