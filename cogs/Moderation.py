@@ -92,7 +92,7 @@ class Moderation(commands.Cog):
         except Exception:
            await ctx.send("Invalid type.")
             
-           await ctx.send(embed=embed)
+        await ctx.send(embed=embed)
     
         
     
