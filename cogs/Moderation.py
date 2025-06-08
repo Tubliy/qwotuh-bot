@@ -77,7 +77,7 @@ class Moderation(commands.Cog):
             return await ctx.send("⚠ Type must be either `spam` or `badwords`.")
             
         embed = discord.Embed(title=f"Set warnings for {member.display_name}."
-        , color=discord.Color.blue)
+        , color=discord.Color.blue())
         embed.set_footer(text="Admin Command.")
     
         try:
