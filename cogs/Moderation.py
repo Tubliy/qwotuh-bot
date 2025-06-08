@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import time
 import asyncio
+import re
 
 class Moderation(commands.Cog):
     def __init__(self,bot):
@@ -129,7 +130,10 @@ class Moderation(commands.Cog):
             return
         
         user_id = message.author.id
-        bad_word_used = next((word for word in self.bad_words if word in message.content.lower()), None)
+        message_content = message.content.lower()
+        bad_word_used = next((word for word in self.bad_words if re.search(rf"\b{re.escape(word)}\b", message_content)), None
+                             
+        )
 
         await self.spam_check(message, user_id)
         
