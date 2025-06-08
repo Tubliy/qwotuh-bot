@@ -42,6 +42,60 @@ class Moderation(commands.Cog):
             with open(self.fileName_badword, "r") as f:
                 return json.load(f)
         return {}
+    
+    
+    @commands.command(name="warnings")
+    @commands.has_permissions(administrator=True)
+    async def warnings(self, ctx, member : discord.Member = None):
+        member = member or ctx.author
+        user_id = str(member.id)
+        
+        bad_word_warnings = self.bad_words_warnings.get(user_id, 0)
+        spam_warnings = self.spam_warnings.get(user_id,0)
+        
+        embed = discord.Embed(title=f"Warnings for {member.display_name}",
+                color=discord.Color.orange()
+        )
+        embed.add_field(name="Bad Word Warnings", value=str(bad_word_warnings), inline=False)
+        embed.add_field(name="Spam Warnings" , value=str(spam_warnings), inline=False)
+        
+        await ctx.send(embed=embed)
+        
+        
+    @commands.command(name="setwarnings")
+    @commands.has_permissions(administrator=True)
+    async def setwarnings(self, ctx, member : discord.Member = None, type: str = None, amount: int = 0):
+        member = member or ctx.author
+        user_id = str(member.id)
+        
+        if amount < 0:
+            await ctx.send("⚠ The number has to be a positive number.")
+        
+        if amount > 3:
+            await ctx.send("⚠ The number can't be greater than 3.")
+        if type not in ["spam", "badwords"]:
+            return await ctx.send("⚠ Type must be either `spam` or `badwords`.")
+            
+        embed = discord.Embed(title=f"Set warnings for {member.display_name}."
+        , color=discord.Color.blue)
+        embed.set_footer(text="Admin Command.")
+    
+        try:
+          if type == "spam":
+              self.spam_warnings[user_id] = amount
+              self.save_spamwarnings()
+              embed.add_field(name="Spam Warning:", value=amount)
+          elif type == "badwords":
+              self.bad_words_warnings[user_id] = amount
+              self.save_badwordwarnings()
+              embed.add_field(name="Bad Word warning:", value=amount)
+        except Exception:
+           await ctx.send("Invalid type.")
+            
+           await ctx.send(embed=embed)
+    
+        
+    
         
     @commands.command(name="clear")
     @commands.has_permissions(administrator=True)
