@@ -1,4 +1,5 @@
 import discord
+from discord import File
 from discord.ext import commands
 import json
 import os
@@ -12,8 +13,10 @@ class QCoins(commands.Cog):
         self.file = 'qcoins.json'
         self.data = self.loadqcoins()
         self.coin_emoji = "<:qcoin:1367163106282963066>"
-        self.random_amount = [0.5, 1.5, 1, 2, 2.24, 3.45, 5, 5.7, 10]
+        self.random_amount = [1000, 2000, 2500, 3000, 3500, 4000, 5000, 6000]
+        self.random_multiplier = [1.5, 2, 2.5, 3, 3.5, 4, 4.5,5 , 5.5]
         self.dailycoins_cooldowns = {}
+        self.imageFile = File("qwotuh.gif", filename="qwotuh.gif")
         
         self.error_embed = discord.Embed(title="Bank💲", description="Error: Not able to proceed with action", color=
         discord.Color.red())
@@ -45,9 +48,10 @@ class QCoins(commands.Cog):
         
         coin_embed = discord.Embed(title="Bank💲", description=f"{member.mention} has a total of {coins} {self.coin_emoji}", color=
         discord.Color.green())
+        coin_embed.set_image(url="attachment://qwotuh.gif")
         coin_embed.set_footer(text=f"Requested by {ctx.author.display_name},  {date_string}")
         
-        await ctx.send(embed=coin_embed)
+        await ctx.send(embed=coin_embed, file=self.imageFile)
         
     @commands.command()
     async def qgive(self, ctx, member: discord.Member, amount: int):
@@ -185,7 +189,7 @@ class QCoins(commands.Cog):
         last_used = self.dailycoins_cooldowns.get(user_id,0)
         remaining = int(cooldown - (now - last_used))
         
-        daily_amount = round(random.choice(self.random_amount))
+        daily_amount = round(random.choice(self.random_amount) * random.choice(self.random_multiplier))
         
         if remaining > 0:
             hours = remaining // 3600
@@ -239,7 +243,7 @@ class QCoins(commands.Cog):
         embed = discord.Embed(title=f" {self.coin_emoji} Q Coin Shop",
         color=discord.Color.green())
         
-        price = 100000
+        price = 1000000
         
         for i in range(1,11):
             embed.add_field(name=f"Prestige {i}:",
@@ -253,7 +257,7 @@ class QCoins(commands.Cog):
     async def buy(self, ctx, prestige : int):
         
        user_id = str(ctx.author.id)
-       prestige_role_price = 100000
+       prestige_role_price = 1000000
        
        if prestige < 1 or prestige > 10:
            await ctx.send("Please enter a valid number between 1 and 10.")
