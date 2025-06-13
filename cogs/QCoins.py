@@ -50,11 +50,7 @@ class QCoins(commands.Cog):
         discord.Color.green())
         coin_embed.set_footer(text=f"Requested by {ctx.author.display_name},  {date_string}")
         
-        with open(self.image_path, "rb") as f:
-            file = discord.File(f, filename=self.image_filename)
-            coin_embed.set_image(url=f"attachment://{self.image_filename}")
-        
-        await ctx.send(embed=coin_embed, file=file)
+        await ctx.send(embed=coin_embed)
         
     @commands.command()
     async def qgive(self, ctx, member: discord.Member, amount: int):
