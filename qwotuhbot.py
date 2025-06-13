@@ -10,8 +10,7 @@ class Main(commands.Bot):
      intents = discord.Intents.default()
      intents.members = True
      intents.message_content = True
-     super().__init__(command_prefix="!", intents=intents, help_command=None)
-     self.add_command(self.help)
+     super().__init__(command_prefix="!", intents=intents)
      
      self.owner = 400402306836856833
      self.moderation = None
@@ -106,64 +105,10 @@ class Main(commands.Bot):
                 await owner_user.send("Qwotuhbot is now online.")
             except discord.Forbidden:
                 print("Couldn't dm the owner.")
-    
-    
-    @commands.command(name="help")   
-    async def help(self, ctx, type : str):
-        
-        user = ctx.author
-        
-        has_mod_role = discord.utils.get(user.roles, name="Moderator") is not None
-        
-        if type is None:
-            await ctx.send("Please specify one of the following: `fun`, `mod`, or `qcoins`.")
-            return
-        
-        try:
-            match type.lower():
-            
-             case "fun":
-                funembed = discord.Embed(title="Fun Commands",
-                                         color=discord.Color.blue())
-                funembed.add_field(name="ppsize", value="Usage: !ppsize @user")
-                funembed.add_field(name="rps", value="!rps (rock|paper|scissor)")
-                funembed.add_field(name="coinflip", value="!coinflip")
-                funembed.add_field(name="meme", value="!meme")
-                funembed.set_footer(text="Fun Command Section")
-                
-                await ctx.send(embed=funembed)
-                
-             case "mod":
-                if has_mod_role:
-                    modembed = discord.Embed(title="Mod Commands", color=discord.Color.red())
-                    
-                    modembed.add_field(name="clear", value="!clear <amount>")
-                    modembed.add_field(name="warnings", value="!warnings @user")
-                    modembed.set_footer(text="Mod Command Section")
-                    
-                    await ctx.send(embed=modembed)
-                else:
-                    await ctx.send("You don't have permission to view these commands.")
-                    
-             case "qcoins":
-                 qcoinsembed = discord.Embed("Qcoins Commands", color=discord.Color.gold())
-                 
-                 qcoinsembed.add_field(name="coins", value="!coins @user")
-                 qcoinsembed.add_field(name="qgive", value="!qgive @user <amount>")
-                 qcoinsembed.add_field(name="gamble", value="!gamble <amount>")
-                 qcoinsembed.add_field(name="daily", value="!daily")
-                 qcoinsembed.add_field(name="leaderboard", value="!leaderboard")
-                 qcoinsembed.add_field(name="shop", value="!shop")
-                 qcoinsembed.add_field(name="buy", value="!buy <int>")
-                 
-                 await ctx.send(embed=qcoinsembed)
-             case _:
-                await ctx.send("Options are fun, mod, and qcoins.")
-        except Exception as e:
-            await ctx.send(f"Error occured: {e}")
         
 if __name__ == "__main__":
     bot = Main()
+    bot.remove_command("help")
     bot.run('MTI5NzA2MDU0OTIwNDUxMjgzOQ.GfV15z._yiVFaa2DF83VRld8V6EXdQuwHN72DComXJKuo')
         
         
