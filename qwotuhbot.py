@@ -115,6 +115,10 @@ class Main(commands.Bot):
         
         has_mod_role = discord.utils.get(user.roles, name="Moderator") is not None
         
+        if type is None:
+            await ctx.send("Please specify one of the following: `fun`, `mod`, or `qcoins`.")
+            return
+        
         try:
             match type.lower():
             
