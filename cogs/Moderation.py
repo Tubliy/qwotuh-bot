@@ -107,22 +107,22 @@ class Moderation(commands.Cog):
     
         
     @commands.command(name="clear")
-    @commands.has_permissions(administrator=True)
     
     async def clear(self, ctx, amount: int):
         
-        if amount <= 0:
-            await ctx.send("Please specify a positive number to clear.")
-            return
+        member = ctx.author
+        mod = discord.utils.get(member.roles, name="Moderator") is not None
         
-        deleted = await ctx.channel.purge(limit=amount+1)
+        if mod:
+            if amount <= 0:
+              await ctx.send("Please specify a positive number to clear.")
+              return
         
-        await ctx.send(f"{ctx.author.mention}, Deleted {len(deleted) - 1} messages!", delete_after = 10)
-    
-    @clear.error
-    async def clear_error(self,ctx, error):
-        if isinstance(error, commands.MissingPermissions):
-            await ctx.send("You are missing the permissions to use this command!")
+            deleted = await ctx.channel.purge(limit=amount+1)
+        
+            await ctx.send(f"{ctx.author.mention}, Deleted {len(deleted) - 1} messages!", delete_after = 10)
+        else:
+            await ctx.send("You do not have the following permissions required to use this command!")
             
             
     def load_bad_words(self):
