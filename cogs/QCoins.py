@@ -236,7 +236,7 @@ class QCoins(commands.Cog):
         if count == 0:
             await ctx.send("No users with QCoins found.")
             
-        embed.set_footer(text="Get to the top, to purchase perstiges and earn prizes!")
+        embed.set_footer(text="Get to the top, to purchase prestiges and earn prizes!")
         await ctx.send(embed=embed)
         
     @commands.command()

@@ -106,7 +106,54 @@ class Main(commands.Bot):
             except discord.Forbidden:
                 print("Couldn't dm the owner.")
         
+    async def help(self, ctx, type : str):
         
+        user = ctx.author
+        
+        has_mod_role = discord.utils.get(user.roles, name="Moderator") is not None
+        
+        try:
+            match type.lower():
+            
+             case "fun":
+                funembed = discord.Embed(title="Fun Commands",
+                                         color=discord.Color.blue())
+                funembed.add_field(name="ppsize", value="Usage: !ppsize @user")
+                funembed.add_field(name="rps", value="!rps (rock|paper|scissor)")
+                funembed.add_field(name="coinflip", value="!coinflip")
+                funembed.add_field(name="meme", value="!meme")
+                funembed.set_footer(text="Fun Command Section")
+                
+                await ctx.send(embed=funembed)
+                
+             case "mod":
+                if has_mod_role:
+                    modembed = discord.Embed(title="Mod Commands", color=discord.Color.red())
+                    
+                    modembed.add_field(name="clear", value="!clear <amount>")
+                    modembed.add_field(name="warnings", value="!warnings @user")
+                    modembed.set_footer(text="Mod Command Section")
+                    
+                    await ctx.send(embed=modembed)
+                else:
+                    await ctx.send("You don't have permission to view these commands.")
+                    
+             case "qcoins":
+                 qcoinsembed = discord.Embed("Qcoins Commands", color=discord.Color.gold())
+                 
+                 qcoinsembed.add_field(name="coins", value="!coins @user")
+                 qcoinsembed.add_field(name="qgive", value="!qgive @user <amount>")
+                 qcoinsembed.add_field(name="gamble", value="!gamble <amount>")
+                 qcoinsembed.add_field(name="daily", value="!daily")
+                 qcoinsembed.add_field(name="leaderboard", value="!leaderboard")
+                 qcoinsembed.add_field(name="shop", value="!shop")
+                 qcoinsembed.add_field(name="buy", value="!buy <int>")
+                 
+                 await ctx.send(embed=qcoinsembed)
+             case _:
+                await ctx.send("Options are fun, mod, and qcoins.")
+        except Exception as e:
+            await ctx.send(f"Error occured: {e}")
         
 if __name__ == "__main__":
     bot = Main()
