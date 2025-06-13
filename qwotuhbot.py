@@ -10,7 +10,8 @@ class Main(commands.Bot):
      intents = discord.Intents.default()
      intents.members = True
      intents.message_content = True
-     super().__init__(command_prefix="!", intents=intents)
+     super().__init__(command_prefix="!", intents=intents, help_command=None)
+     self.add_command(self.help)
      
      self.owner = 400402306836856833
      self.moderation = None
@@ -105,7 +106,9 @@ class Main(commands.Bot):
                 await owner_user.send("Qwotuhbot is now online.")
             except discord.Forbidden:
                 print("Couldn't dm the owner.")
-        
+    
+    
+    @commands.command(name="help")   
     async def help(self, ctx, type : str):
         
         user = ctx.author
@@ -157,7 +160,6 @@ class Main(commands.Bot):
         
 if __name__ == "__main__":
     bot = Main()
-    bot.remove_command("help")
     bot.run('MTI5NzA2MDU0OTIwNDUxMjgzOQ.GfV15z._yiVFaa2DF83VRld8V6EXdQuwHN72DComXJKuo')
         
         

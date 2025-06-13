@@ -45,22 +45,25 @@ class Moderation(commands.Cog):
     
     
     @commands.command(name="warnings")
-    @commands.has_permissions(administrator=True)
     async def warnings(self, ctx, member : discord.Member = None):
         member = member or ctx.author
         user_id = str(member.id)
         
+        mod = discord.utils.get(member.roles, name="Moderator") is not None
+        
         bad_word_warnings = self.bad_words_warnings.get(user_id, 0)
         spam_warnings = self.spam_warnings.get(user_id,0)
         
-        embed = discord.Embed(title=f"Warnings for {member.display_name}",
+        if mod:
+         embed = discord.Embed(title=f"Warnings for {member.display_name}",
                 color=discord.Color.orange()
-        )
-        embed.add_field(name="Bad Word Warnings", value=str(bad_word_warnings), inline=False)
-        embed.add_field(name="Spam Warnings" , value=str(spam_warnings), inline=False)
+         )
+         embed.add_field(name="Bad Word Warnings", value=str(bad_word_warnings), inline=False)
+         embed.add_field(name="Spam Warnings" , value=str(spam_warnings), inline=False)
         
-        await ctx.send(embed=embed)
-        
+         await ctx.send(embed=embed)
+        else:
+           await ctx.send("You don't have permission for this command!")
         
     @commands.command(name="setwarnings")
     @commands.has_permissions(administrator=True)
