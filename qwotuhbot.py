@@ -3,6 +3,7 @@ from discord.ext import commands, tasks
 from discord.ui import Button, View
 import os
 import asyncio
+from dotenv import load_dotenv
 
 
 class Main(commands.Bot):
@@ -107,9 +108,11 @@ class Main(commands.Bot):
                 print("Couldn't dm the owner.")
         
 if __name__ == "__main__":
+    load_dotenv("bot.env")
+    TOKEN = os.getenv("DISCORD_TOKEN")
     bot = Main()
     bot.remove_command("help")
-    bot.run('MTI5NzA2MDU0OTIwNDUxMjgzOQ.GfV15z._yiVFaa2DF83VRld8V6EXdQuwHN72DComXJKuo')
+    bot.run(TOKEN)
         
         
      
